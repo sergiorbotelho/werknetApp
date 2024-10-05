@@ -1,17 +1,20 @@
 import Image from "next/image";
 import logo from "../../../public/logo.jpeg";
 import Link from "next/link";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "../components/ui/button";
-import { Menu } from "lucide-react";
+
 import SheetMenu from "../components/sheetGlobal";
 
 export default function Home() {
   return (
     <>
       <SheetMenu />
-      <div className="w-full h-screen flex flex-col px-8 items-center justify-center">
-        <Image alt="Logo da WerkNet" src={logo} width={400} />
+      <div className="w-full h-screen flex flex-col px-8 items-center md:mt-20">
+        <Image
+          alt="Logo da WerkNet"
+          src={logo}
+          width={400}
+          className="md:hidden"
+        />
         <h1 className="text-3xl font-bold mb-6 text-center ">
           Bem-vindo ao Gerenciamento de Ordem de Serviços da WerkNet
         </h1>

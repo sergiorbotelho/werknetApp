@@ -98,7 +98,7 @@ export default function Customers() {
   return (
     <div className="max-w-6xl mx-auto">
       <SheetMenu />
-      <div className=" flex flex-col md:mt-80 mt-20 mx-10 justify-center">
+      <div className=" flex flex-col mt-10 mx-10 justify-center">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Clientes</h1>
           <Button onClick={() => handleOpenModal()}>Adicionar Cliente</Button>

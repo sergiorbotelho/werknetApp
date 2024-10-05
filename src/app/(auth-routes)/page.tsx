@@ -4,21 +4,13 @@ import Link from "next/link";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "../components/ui/button";
 import { Menu } from "lucide-react";
+import SheetMenu from "../components/sheetGlobal";
 
 export default function Home() {
   return (
     <>
-      <div className="md:hidden text-right mt-4 mr-4">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline">
-              <Menu />
-            </Button>
-          </SheetTrigger>
-          <SheetContent></SheetContent>
-        </Sheet>
-      </div>
-      <div className="w-full h-screen flex flex-col px-8 items-center">
+      <SheetMenu />
+      <div className="w-full h-screen flex flex-col px-8 items-center justify-center">
         <Image alt="Logo da WerkNet" src={logo} width={400} />
         <h1 className="text-3xl font-bold mb-6 text-center ">
           Bem-vindo ao Gerenciamento de Ordem de Serviços da WerkNet

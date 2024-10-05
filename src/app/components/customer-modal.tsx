@@ -70,6 +70,7 @@ export function CustomerModal({ customer, onClose, onSave }) {
                 id="nome"
                 name="nome"
                 value={formData.nome}
+                autoFocus={false}
                 onChange={handleChange}
                 className="col-span-3"
                 readOnly={update !== "Salvar" ? true : false}

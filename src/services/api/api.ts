@@ -1,34 +1,53 @@
 import axios from "axios";
-import { getSession } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
 
 let accessToken: string | null = null; // Armazenar o token em memória
 
 // Criar a instância do Axios
 export const api = axios.create({
-  baseURL: "http://localhost:3333",
+  baseURL: "http://localhost:3333", // Substitua pela URL correta da sua API
 });
 
-// Adicionar um interceptor para adicionar o token em todas as requisições
+// Interceptor de requisição
 api.interceptors.request.use(
   async (config) => {
-    if (!accessToken) {
-      // Pegar a sessão apenas se o token ainda não foi obtido
-      const session = await getSession();
-
-      // Se existir uma sessão, armazena o token
-      if (session && session.user.token) {
-        accessToken = session.user.token;
+    try {
+      // Verifica se o token já foi carregado
+      if (!accessToken) {
+        const session = await getSession(); // Obtém a sessão atual
+        if (session?.user?.token) {
+          accessToken = session.user.token; // Armazena o token em memória
+        }
       }
-    }
 
-    // Se o token estiver disponível, adicionar ao cabeçalho Authorization
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
+      // Adiciona o token no cabeçalho Authorization
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
 
-    return config;
+      return config;
+    } catch (error) {
+      console.error("Erro ao configurar o token:", error);
+      return Promise.reject(error);
+    }
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Interceptor de resposta para lidar com erros de autenticação
+api.interceptors.response.use(
+  (response) => response, // Retorna a resposta normalmente
+  async (error) => {
+    if (error.response?.status === 401) {
+      console.log("Token expirado ou inválido. Redirecionando para login...");
+      accessToken = null; // Limpa o token armazenado na memória
+
+      // Faz logout e redireciona o usuário para a página de login
+      await signOut({ callbackUrl: "/login" });
+    }
+
     return Promise.reject(error);
   }
 );

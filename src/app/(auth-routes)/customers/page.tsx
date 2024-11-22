@@ -9,10 +9,9 @@ import { Input } from "@/app/components/ui/input";
 
 import SheetMenu from "@/app/components/sheetGlobal";
 import { api } from "@/services/api/api";
-import { Customer } from "../../../../types/customer";
+import { Customer } from "../../../types/customer";
 
 import { CustomerCardSkeleton } from "@/app/components/skeletonCard";
-import { toast } from "react-toastify";
 
 interface Customers {
   customers: Customer[];
@@ -23,8 +22,8 @@ export default function Customers() {
   const [customers, setCustomers] = useState<Customers>();
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isNewCustomer, setIsNewCustomer] = useState(false);
 
+  const [refresh, setRefresh] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -43,48 +42,17 @@ export default function Customers() {
         });
     };
     loadCustomers();
-  }, [loading]);
+  }, [refresh]);
 
   const handleOpenModal = (customer = null) => {
     setSelectedCustomer(customer);
-    setIsNewCustomer(!customer);
+
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setSelectedCustomer(null);
     setIsModalOpen(false);
-  };
-
-  const handleSaveCustomer = async (customer: Customer) => {
-    setLoading(true);
-    if (isNewCustomer) {
-      await api
-        .post("/client", customer)
-        .then((response) => {
-          setLoading(false);
-          toast.success("Cliente cadastrado com sucesso");
-          handleCloseModal();
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    }
-    if (!isNewCustomer) {
-      const { id, ...data } = customer;
-      console.log(data);
-
-      await api
-        .put(`/client/${customer.id}`, data)
-        .then((response) => {
-          setLoading(false);
-          toast.success("Cliente atualizado com sucesso");
-        })
-        .catch((error) => {
-          setLoading(false);
-          console.log(error);
-        });
-    }
   };
 
   const filteredCustomers = customers?.customers.filter(
@@ -119,19 +87,21 @@ export default function Customers() {
                 .fill(0)
                 .map((_, index) => <CustomerCardSkeleton key={index} />)
             : filteredCustomers &&
-              filteredCustomers.map((customer) => (
-                <CustomerCard
-                  key={customer?.id}
-                  customer={customer}
-                  onView={() => handleOpenModal(customer)}
-                />
-              ))}
+              filteredCustomers
+                .reverse()
+                .map((customer) => (
+                  <CustomerCard
+                    key={customer?.id}
+                    customer={customer}
+                    onView={() => handleOpenModal(customer)}
+                  />
+                ))}
         </div>
         {isModalOpen && (
           <CustomerModal
             customer={selectedCustomer}
             onClose={handleCloseModal}
-            onSave={handleSaveCustomer}
+            setRefresh={setRefresh}
           />
         )}
       </div>

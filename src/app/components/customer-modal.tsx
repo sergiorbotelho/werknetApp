@@ -1,17 +1,31 @@
-import { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-} from "./ui/dialog";
+} from "@/app/components/ui/dialog";
+import { api } from "@/services/api/api";
+import { Customer } from "@/types/customer";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
 
-export function CustomerModal({ customer, onClose, onSave }) {
+interface ICustomerProps {
+  customer: Customer;
+  onClose: () => void;
+  setRefresh: (valeu: boolean) => void;
+}
+
+export function CustomerModal({
+  customer,
+  onClose,
+  setRefresh,
+}: ICustomerProps) {
   const [update, setUpdate] = useState(customer ? "Atualizar" : "Salvar");
+
   const [formData, setFormData] = useState(
     customer
       ? {
@@ -37,9 +51,34 @@ export function CustomerModal({ customer, onClose, onSave }) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSave = (formData) => {
-    onSave(formData);
-    onClose();
+  const handleSaveCustomer = async (customer: Customer) => {
+    setRefresh(true);
+    if (!customer) {
+      await api
+        .post("/client", customer)
+        .then((response) => {
+          setRefresh(false);
+          toast.success("Cliente cadastrado com sucesso");
+          onClose();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+    if (customer) {
+      const { id, ...data } = customer;
+
+      await api
+        .put(`/client/${customer.id}`, data)
+        .then((response) => {
+          setRefresh(false);
+          toast.success("Cliente atualizado com sucesso");
+          onClose();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   };
 
   const handleSubmit = (e) => {
@@ -48,7 +87,7 @@ export function CustomerModal({ customer, onClose, onSave }) {
       setUpdate("Salvar");
     } else if (update === "Salvar") {
       e.preventDefault();
-      handleSave(formData);
+      handleSaveCustomer(formData);
     }
   };
 

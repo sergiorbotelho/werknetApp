@@ -2,40 +2,16 @@
 
 import { useEffect, useState } from "react";
 
-// import { ServiceOrderModal } from '../components/service-order-modal'
-// import { ConfirmationModal } from '../components/confirmation-modal'
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import SheetMenu from "@/app/components/sheetGlobal";
 import { ServiceOrderCard } from "@/app/components/service-card";
 import { api } from "@/services/api/api";
 import { ServiceOrderSkeleton } from "@/app/components/skeletonOs";
-import { IOrderService } from "../../../../types/order";
+import { IOrderService } from "../../../types/order";
 import PdfOrder from "@/report/pdfOrder";
-
-const mockServiceOrders = [
-  {
-    id: 1,
-    number: "OS001",
-    customerName: "John Doe",
-    equipmentModel: "Laptop XYZ",
-    issue: "Wont turn on",
-  },
-  {
-    id: 2,
-    number: "OS002",
-    customerName: "Jane Smith",
-    equipmentModel: "Printer ABC",
-    issue: "Paper jam",
-  },
-  {
-    id: 3,
-    number: "OS003",
-    customerName: "Bob Johnson",
-    equipmentModel: "Smartphone Model X",
-    issue: "Cracked screen",
-  },
-];
+import { ServiceOrderModal } from "@/app/components/service-modal";
+import { toast } from "react-toastify";
 
 export default function ServiceOrdersPage() {
   const [serviceOrders, setServiceOrders] = useState<IOrderService[] | null>(
@@ -45,8 +21,7 @@ export default function ServiceOrdersPage() {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNewOrder, setIsNewOrder] = useState(false);
-  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
-  const [orderToDelete, setOrderToDelete] = useState(null);
+  const [refresh, setRefresh] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
@@ -65,7 +40,7 @@ export default function ServiceOrdersPage() {
         });
     };
     loadOrders();
-  }, [loading]);
+  }, [refresh]);
 
   const handleOpenModal = (order = null) => {
     setSelectedOrder(order);
@@ -78,22 +53,25 @@ export default function ServiceOrdersPage() {
     setIsModalOpen(false);
   };
 
-  const handleSaveOrder = (order) => {
+  const handleSaveOrder = async (order: IOrderService) => {
+    setRefresh(true);
     if (isNewOrder) {
-      setServiceOrders([
-        ...serviceOrders,
-        {
-          ...order,
-          id: serviceOrders.length + 1,
-          number: `OS${(serviceOrders.length + 1).toString().padStart(3, "0")}`,
-        },
-      ]);
-    } else {
-      setServiceOrders(
-        serviceOrders.map((o) => (o.id === order.id ? order : o))
-      );
+      console.log(order);
     }
-    handleCloseModal();
+    if (!isNewOrder) {
+      const { id, client, created_at, ...data } = order;
+
+      await api
+        .put(`/os/${id}`, data)
+        .then((response) => {
+          setRefresh(false);
+          toast.success("OS atualizado com sucesso");
+        })
+        .catch((error) => {
+          setRefresh(false);
+          console.error(error);
+        });
+    }
   };
 
   const filteredOrders = serviceOrders.filter(
@@ -115,7 +93,7 @@ export default function ServiceOrdersPage() {
         <div className="mb-4">
           <Input
             type="text"
-            placeholder="Search service orders..."
+            placeholder="Pesquisar ordem de serviço"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full"
@@ -126,29 +104,24 @@ export default function ServiceOrdersPage() {
             ? Array(3)
                 .fill(0)
                 .map((_, index) => <ServiceOrderSkeleton key={index} />)
-            : filteredOrders.map((order) => (
-                <ServiceOrderCard
-                  key={order.id}
-                  order={order}
-                  onView={() => handleOpenModal(order)}
-                  onPrint={() => PdfOrder({ order })}
-                />
-              ))}
+            : filteredOrders
+                .reverse()
+                .map((order) => (
+                  <ServiceOrderCard
+                    key={order.id}
+                    order={order}
+                    onView={() => handleOpenModal(order)}
+                    onPrint={() => PdfOrder({ order })}
+                  />
+                ))}
         </div>
-        {/* {isModalOpen && (
-        <ServiceOrderModal
-          order={selectedOrder}
-          onClose={handleCloseModal}
-          onSave={handleSaveOrder}
-        />
-      )} */}
-        {/* <ConfirmationModal
-        isOpen={isConfirmationModalOpen}
-        onClose={() => setIsConfirmationModalOpen(false)}
-        onConfirm={confirmDeleteOrder}
-        title="Delete Service Order"
-        message="Are you sure you want to delete this service order? This action cannot be undone."
-      /> */}
+        {isModalOpen && (
+          <ServiceOrderModal
+            order={selectedOrder}
+            onClose={handleCloseModal}
+            onSave={handleSaveOrder}
+          />
+        )}
       </div>
     </div>
   );

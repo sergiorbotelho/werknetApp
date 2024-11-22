@@ -5,7 +5,7 @@ import {
   CardTitle,
 } from "@/app/components/ui/card";
 import { Button } from "@/app/components/ui/button";
-import { Pencil, Trash2, Printer } from "lucide-react";
+import { Printer } from "lucide-react";
 
 export function ServiceOrderCard({ order, onView, onPrint }) {
   return (
@@ -13,7 +13,7 @@ export function ServiceOrderCard({ order, onView, onPrint }) {
       <CardHeader>
         <CardTitle className="flex justify-between items-center">
           <span className="cursor-pointer" onClick={onView}>
-            OS {order.number}
+            OS {order.id}
           </span>
           <div className="space-x-2">
             <Button

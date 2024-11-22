@@ -1,5 +1,8 @@
 export interface IOrderService {
   id: number;
+  contato: string;
+  horaEntrada: string;
+  horaSaida: string;
   defeito: string;
   defeitoConstatado: string;
   garantiaPeca: string;
@@ -10,6 +13,7 @@ export interface IOrderService {
   total: string;
   valMaterial: string;
   valServico: string;
+  created_at: string;
   client: {
     id: number;
     nome: string;

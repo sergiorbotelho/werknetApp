@@ -5,7 +5,7 @@ let accessToken: string | null = null; // Armazenar o token em memória
 
 // Criar a instância do Axios
 export const api = axios.create({
-  baseURL: "http://localhost:3333", // Substitua pela URL correta da sua API
+  baseURL: process.env.NEXT_PUBLIC_API, // Substitua pela URL correta da sua API
 });
 
 // Interceptor de requisição

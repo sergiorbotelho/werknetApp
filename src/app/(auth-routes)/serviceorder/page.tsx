@@ -2,16 +2,15 @@
 
 import { useEffect, useState } from "react";
 
+import { ServiceOrderCard } from "@/app/components/service-card";
+import { ServiceOrderModal } from "@/app/components/service-modal";
+import { ServiceOrderSkeleton } from "@/app/components/skeletonOs";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
-import SheetMenu from "@/app/components/sheetGlobal";
-import { ServiceOrderCard } from "@/app/components/service-card";
-import { api } from "@/services/api/api";
-import { ServiceOrderSkeleton } from "@/app/components/skeletonOs";
-import { IOrderService } from "../../../types/order";
 import PdfOrder from "@/report/pdfOrder";
-import { ServiceOrderModal } from "@/app/components/service-modal";
+import { api } from "@/services/api/api";
 import { toast } from "react-toastify";
+import { IOrderService } from "../../../types/order";
 
 export default function ServiceOrdersPage() {
   const [serviceOrders, setServiceOrders] = useState<IOrderService[] | null>(
@@ -82,7 +81,6 @@ export default function ServiceOrdersPage() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <SheetMenu />
       <div className=" flex flex-col mt-10 mx-10 justify-center">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Ordem de serviço</h1>

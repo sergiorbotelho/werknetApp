@@ -49,7 +49,7 @@ export function ServiceOrderModal({ order, onClose, onSave }) {
 
   const [update, setUpdate] = useState(order ? "Atualizar" : "Salvar");
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [refresh, setRefresh] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export function ServiceOrderModal({ order, onClose, onSave }) {
         });
     };
     loadCustomers();
-  }, []);
+  }, [refresh]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -90,10 +90,11 @@ export function ServiceOrderModal({ order, onClose, onSave }) {
     }
   };
   const handleCustomerSelect = (customerName) => {
-    console.log(customerName);
-    console.log(formData);
-
     setFormData({ ...formData, nome: customerName });
+    setOpen(false);
+  };
+
+  const onCloseModalCustomer = () => {
     setOpen(false);
   };
 
@@ -101,9 +102,9 @@ export function ServiceOrderModal({ order, onClose, onSave }) {
     <>
       {open && (
         <CustomerModal
-          customer={""}
-          onClose={() => setOpen(false)}
-          onSave={() => {}}
+          customer={null}
+          onClose={onCloseModalCustomer}
+          setRefresh={setRefresh}
         />
       )}
       <Dialog open={true} onOpenChange={onClose}>

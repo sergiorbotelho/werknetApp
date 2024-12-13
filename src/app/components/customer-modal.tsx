@@ -14,7 +14,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
 interface ICustomerProps {
-  customer: Customer;
+  customer: Customer | null;
   onClose: () => void;
   setRefresh: (valeu: boolean) => void;
 }
@@ -51,11 +51,11 @@ export function CustomerModal({
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSaveCustomer = async (customer: Customer) => {
+  const handleSaveCustomer = async (customerEdit: Customer) => {
     setRefresh(true);
     if (!customer) {
       await api
-        .post("/client", customer)
+        .post("/client", customerEdit)
         .then((response) => {
           setRefresh(false);
           toast.success("Cliente cadastrado com sucesso");
@@ -66,17 +66,17 @@ export function CustomerModal({
         });
     }
     if (customer) {
-      const { id, ...data } = customer;
+      const { id, ...data } = customerEdit;
 
       await api
-        .put(`/client/${customer.id}`, data)
+        .put(`/client/${customerEdit.id}`, data)
         .then((response) => {
           setRefresh(false);
           toast.success("Cliente atualizado com sucesso");
           onClose();
         })
         .catch((error) => {
-          console.log(error);
+          console.error(error);
         });
     }
   };

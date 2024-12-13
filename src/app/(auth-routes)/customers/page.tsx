@@ -7,7 +7,6 @@ import { CustomerModal } from "../../components/customer-modal";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 
-import SheetMenu from "@/app/components/sheetGlobal";
 import { api } from "@/services/api/api";
 import { Customer } from "../../../types/customer";
 
@@ -65,7 +64,6 @@ export default function Customers() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <SheetMenu />
       <div className=" flex flex-col mt-10 mx-10 justify-center">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Clientes</h1>

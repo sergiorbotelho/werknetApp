@@ -1,9 +1,10 @@
+import { SidebarNav } from "@/components/sidebar-nav";
 import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 import { Header } from "../components/header";
-import SheetMenu from "../components/sheetGlobal";
+import { ThemeProvider } from "../components/theme-provider";
 
 export default async function PrivateLayout({
   children,
@@ -16,10 +17,15 @@ export default async function PrivateLayout({
     redirect("/login");
   }
   return (
-    <>
-      <SheetMenu />
-      <Header />
-      {children}
-    </>
+    <ThemeProvider>
+      {/* <SheetMenu /> */}
+      <div className="flex">
+        <SidebarNav />
+        <div className="flex flex-col flex-1">
+          <Header />
+          {children}
+        </div>
+      </div>
+    </ThemeProvider>
   );
 }

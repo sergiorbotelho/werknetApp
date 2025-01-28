@@ -1,13 +1,7 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/app/components/ui/card";
-import Image from "next/image";
-import logo from "../../../public/logo.jpeg";
+import { Button } from "@/app/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/app/components/ui/card";
 import {
   Form,
   FormControl,
@@ -16,16 +10,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/app/components/ui/form";
-import { Button } from "@/app/components/ui/button";
+import Image from "next/image";
 import { z } from "zod";
+import logo from "../../../public/logo.jpeg";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/app/components/ui/input";
-import { useForm } from "react-hook-form";
-import { api } from "@/services/api/api";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 interface Inputs {
   email: string;

@@ -84,7 +84,7 @@ export default function ServiceOrdersPage() {
       <div className=" flex flex-col mt-10 mx-10 justify-center">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Ordem de serviço</h1>
-          <Button onClick={() => handleOpenModal()}>
+          <Button onClick={() => handleOpenModal()} className="text-white">
             Criar ordem de serviço
           </Button>
         </div>

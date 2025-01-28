@@ -67,7 +67,9 @@ export default function Customers() {
       <div className=" flex flex-col mt-10 mx-10 justify-center">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Clientes</h1>
-          <Button onClick={() => handleOpenModal()}>Adicionar Cliente</Button>
+          <Button onClick={() => handleOpenModal()} className="text-white">
+            Adicionar Cliente
+          </Button>
         </div>
         <div className="mb-4">
           <Input

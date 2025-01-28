@@ -1,13 +1,12 @@
+import { ThemeProvider } from "@/app/components/theme-provider";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "@/app/components/theme-provider";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "./globals.css";
 
 import NextAuthSessionProvider from "@/providers/sessionProvider";
 import { AuthProvider } from "../context/AuthContext";
-import { Sheet } from "@/components/ui/sheet";
 const roboto = Roboto({
   weight: ["400", "700", "900"],
   subsets: ["latin"],
@@ -28,7 +27,6 @@ export default async function RootLayout({
       <body className={roboto.className}>
         <NextAuthSessionProvider>
           <AuthProvider>
-            <Sheet />
             <ThemeProvider
               attribute="class"
               defaultTheme="system"

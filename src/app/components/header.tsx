@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { Button } from "@/app/components/ui/button";
-import logo from "../../../public/logo.jpeg";
 import Image from "next/image";
+import Link from "next/link";
+import logo from "../../../public/logo.jpeg";
 export function Header() {
   return (
-    <header className="bg-white border-b hidden md:block">
+    <header className=" border-b hidden md:block ">
       <div className="max-w-6xl mx-auto px-4 py-2 flex justify-between items-center">
         <Link href="/" className="flex items-center space-x-2">
           <Image alt="Logo WerkNet" src={logo} width={200} />

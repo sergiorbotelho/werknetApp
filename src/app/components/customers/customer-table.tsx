@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import { ScrollArea } from "../ui/scroll-area";
 import {
   Table,
   TableBody,
@@ -75,7 +76,7 @@ export function CustomerTable({
     }
   };
   return (
-    <>
+    <ScrollArea className="h-[600px] ">
       <Table>
         <TableHeader>
           <TableRow>
@@ -137,6 +138,6 @@ export function CustomerTable({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
+    </ScrollArea>
   );
 }

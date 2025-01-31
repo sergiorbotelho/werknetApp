@@ -18,7 +18,7 @@ export function SidebarNav({
 
   const [isExpanded, setIsExpanded] = useState(false);
   const path = usePathname();
-  console.log(path);
+
   const router = useRouter();
   return (
     <div

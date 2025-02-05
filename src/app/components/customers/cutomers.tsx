@@ -3,6 +3,7 @@ import { Customer } from "@/types/customer";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { CustomerModal } from "./customer-modal";
 import { CustomerTable } from "./customer-table";
 
 interface CustomersProps {
@@ -27,13 +28,13 @@ export default function Customers({ customers }: CustomersProps) {
     setIsModalOpen(false);
   };
   console.log(customers);
-  // const filteredCustomers = customers?.customers.filter(
-  //   (customer) =>
-  //     customer.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     customer.telefone.includes(searchTerm) ||
-  //     customer.cpf?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     customer.cnpj?.toLowerCase().includes(searchTerm.toLowerCase())
-  // );
+  const filteredCustomers = customers?.filter(
+    (customer) =>
+      customer.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.telefone.includes(searchTerm) ||
+      customer.cpf?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.cnpj?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className=" flex flex-col mt-10 justify-center min-w-96 mx-auto px-4">
@@ -58,13 +59,9 @@ export default function Customers({ customers }: CustomersProps) {
         onDelete={() => {}}
       />
       <div className="w-full"></div>
-      {/* {isModalOpen && (
-        <CustomerModal
-          customer={selectedCustomer}
-          onClose={handleCloseModal}
-          setRefresh={setRefresh}
-        />
-      )} */}
+      {isModalOpen && (
+        <CustomerModal customer={selectedCustomer} onClose={handleCloseModal} />
+      )}
     </div>
   );
 }

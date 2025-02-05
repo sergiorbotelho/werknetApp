@@ -18,8 +18,10 @@ import { Input } from "@/app/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import { LoadingSpinner } from "../components/ui/loading";
 
 interface Inputs {
   email: string;
@@ -32,6 +34,7 @@ const formSchema = z.object({
 
 export default function Login() {
   const { handleSubmit, register } = useForm<Inputs>();
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,6 +42,7 @@ export default function Login() {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setLoading(true);
     const result = await signIn("credentials", {
       email: values.email,
       password: values.password,
@@ -46,8 +50,7 @@ export default function Login() {
     });
 
     if (result?.error) {
-      console.error(result.error);
-
+      setLoading(false);
       toast.error(
         result.status === 401
           ? "Usuário ou senha inválida"
@@ -59,7 +62,16 @@ export default function Login() {
       return;
     }
     router.replace("/");
+    setLoading(false);
   };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-dvh w-full">
+        <LoadingSpinner size={60} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-center h-dvh">

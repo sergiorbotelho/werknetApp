@@ -9,21 +9,16 @@ import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 
 interface ICustomerProps {
   customer: Customer | null;
   onClose: () => void;
-  setRefresh: (valeu: boolean) => void;
 }
 
-export function CustomerModal({
-  customer,
-  onClose,
-  setRefresh,
-}: ICustomerProps) {
+export function CustomerModal({ customer, onClose }: ICustomerProps) {
   const [update, setUpdate] = useState(customer ? "Atualizar" : "Salvar");
 
   const [formData, setFormData] = useState(
@@ -52,12 +47,10 @@ export function CustomerModal({
   };
 
   const handleSaveCustomer = async (customerEdit: Customer) => {
-    setRefresh(true);
     if (!customer) {
       await api
         .post("/client", customerEdit)
         .then((response) => {
-          setRefresh(false);
           toast.success("Cliente cadastrado com sucesso");
           onClose();
         })
@@ -71,7 +64,6 @@ export function CustomerModal({
       await api
         .put(`/client/${customerEdit.id}`, data)
         .then((response) => {
-          setRefresh(false);
           toast.success("Cliente atualizado com sucesso");
           onClose();
         })

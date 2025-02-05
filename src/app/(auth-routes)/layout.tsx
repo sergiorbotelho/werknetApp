@@ -3,8 +3,8 @@ import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
+import { ThemeProvider } from "../../providers/theme-provider";
 import { Header } from "../components/header";
-import { ThemeProvider } from "../components/theme-provider";
 
 export default async function PrivateLayout({
   children,

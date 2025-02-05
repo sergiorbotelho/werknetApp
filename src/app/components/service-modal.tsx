@@ -19,7 +19,8 @@ import { useEffect, useState } from "react";
 
 import { api } from "@/services/api/api";
 import { Customer } from "../../types/customer";
-import { CustomerModal } from "./customer-modal";
+
+import { CustomerModal } from "./customers/customer-modal";
 import { TimePicker } from "./timePicker";
 
 export function ServiceOrderModal({ order, onClose, onSave }) {
@@ -100,13 +101,7 @@ export function ServiceOrderModal({ order, onClose, onSave }) {
 
   return (
     <>
-      {open && (
-        <CustomerModal
-          customer={null}
-          onClose={onCloseModalCustomer}
-          setRefresh={setRefresh}
-        />
-      )}
+      {open && <CustomerModal customer={null} onClose={onCloseModalCustomer} />}
       <Dialog open={true} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

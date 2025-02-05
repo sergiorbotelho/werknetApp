@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@/app/components/theme-provider";
+import { ThemeProvider } from "@/providers/theme-provider";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { ToastContainer } from "react-toastify";

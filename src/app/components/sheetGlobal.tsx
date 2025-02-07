@@ -3,7 +3,7 @@ import {
   SheetClose,
   SheetContent,
   SheetTrigger,
-} from "@/components/ui/sheet";
+} from "@/app/components/ui/sheet";
 import { Logs, Menu, UserPenIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

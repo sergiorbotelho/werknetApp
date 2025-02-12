@@ -4,16 +4,6 @@ import { Customer } from "@/types/customer";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 import { ScrollArea } from "../ui/scroll-area";
 import {
   Table,
@@ -29,15 +19,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { CustomerModal } from "./customer-modal";
 interface CustomerTableProps {
   customers: Customer[];
   onEdit: (customer: Customer) => void;
-  onDelete: (id: number) => void;
+  searchTerm: string;
 }
 
 export function CustomerTable({
   onEdit,
-  onDelete,
+  searchTerm,
   customers,
 }: CustomerTableProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
@@ -45,9 +36,14 @@ export function CustomerTable({
   );
   const [isEditing, setIsEditing] = useState(false);
   const [editedCustomer, setEditedCustomer] = useState<Customer | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [customerToDelete, setCustomerToDelete] = useState<number | null>(null);
-  const [tableCustomers, setTableCustomers] = useState<Customer[]>([]);
+
+  const filteredCustomers = customers?.filter(
+    (customer) =>
+      customer.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.telefone.includes(searchTerm) ||
+      customer.cpf?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.cnpj?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const handleRowClick = (customer: Customer) => {
     setSelectedCustomer(customer);
@@ -70,19 +66,6 @@ export function CustomerTable({
     }
   };
 
-  const handleDelete = (id: number, event: React.MouseEvent) => {
-    event.stopPropagation();
-    setCustomerToDelete(id);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (customerToDelete !== null) {
-      onDelete(customerToDelete);
-      setIsDeleteDialogOpen(false);
-      setCustomerToDelete(null);
-    }
-  };
   return (
     <ScrollArea className="h-[600px] ">
       <TooltipProvider>
@@ -91,12 +74,13 @@ export function CustomerTable({
             <TableRow>
               <TableHead className="w-[50px] text-center">Id</TableHead>
               <TableHead className="">Nome</TableHead>
-              <TableHead className="w-72">Telefone</TableHead>
+              <TableHead className="">Telefone</TableHead>
+              <TableHead className="">CPF / CNPJ</TableHead>
               <TableHead>Email</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {customers.map((customer) => (
+            {filteredCustomers.map((customer) => (
               <TableRow
                 key={customer.id}
                 onClick={() => handleRowClick(customer)}
@@ -107,6 +91,9 @@ export function CustomerTable({
                 </TableCell>
                 <TableCell>{customer.nome}</TableCell>
                 <TableCell>{customer.telefone}</TableCell>
+                <TableCell>
+                  {customer.cpf?.trim() ? customer.cpf : customer.cnpj}
+                </TableCell>
                 <TableCell>sergiorbotelho@gmail.com</TableCell>
                 <TableCell className="text-right">
                   <Tooltip>
@@ -128,7 +115,13 @@ export function CustomerTable({
             ))}
           </TableBody>
         </Table>
-        <Dialog
+        {selectedCustomer !== null && (
+          <CustomerModal
+            customer={selectedCustomer}
+            onClose={() => setSelectedCustomer(null)}
+          />
+        )}
+        {/* <Dialog
           open={selectedCustomer !== null}
           onOpenChange={(open) => !open && setSelectedCustomer(null)}
         >
@@ -188,30 +181,7 @@ export function CustomerTable({
               )}
             </DialogFooter>
           </DialogContent>
-        </Dialog>
-
-        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Confirmar exclusão</DialogTitle>
-              <DialogDescription>
-                Tem certeza que deseja excluir este cliente? Esta ação não pode
-                ser desfeita.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setIsDeleteDialogOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button variant="destructive" onClick={confirmDelete}>
-                Excluir
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        </Dialog> */}
       </TooltipProvider>
     </ScrollArea>
   );

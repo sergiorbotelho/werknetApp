@@ -27,14 +27,6 @@ export default function Customers({ customers }: CustomersProps) {
     setSelectedCustomer(null);
     setIsModalOpen(false);
   };
-  console.log(customers);
-  const filteredCustomers = customers?.filter(
-    (customer) =>
-      customer.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.telefone.includes(searchTerm) ||
-      customer.cpf?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customer.cnpj?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <div className=" flex flex-col mt-10 justify-center min-w-96 mx-auto px-4">
@@ -47,7 +39,7 @@ export default function Customers({ customers }: CustomersProps) {
       <div className="mb-4">
         <Input
           type="text"
-          placeholder="Pesquisar cliente"
+          placeholder="Pesquise por Nome/Telefone/CPF/CNPJ"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full"
@@ -56,7 +48,7 @@ export default function Customers({ customers }: CustomersProps) {
       <CustomerTable
         customers={customers}
         onEdit={() => {}}
-        onDelete={() => {}}
+        searchTerm={searchTerm}
       />
       <div className="w-full"></div>
       {isModalOpen && (

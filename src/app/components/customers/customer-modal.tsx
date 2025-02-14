@@ -12,7 +12,7 @@ import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SquareX } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { toast } from "react-toastify";
@@ -29,7 +29,7 @@ const schema = z
     numero: z.string().min(1, "Número é obrigatório"),
     bairro: z.string().min(2, "Bairro é obrigatório"),
     cidade: z.string().min(2, "Cidade é obrigatória"),
-    uf: z.string().length(2, "UF deve ter 2 caracteres"),
+    uf: z.string().length(2, "UF é obrigatória"),
   })
   .refine((data) => data.cpf || data.cnpj, {
     message: "CPF ou CNPJ é obrigatório",
@@ -41,20 +41,48 @@ type FormData = z.infer<typeof schema>;
 interface RegisterClientModalProps {
   onClose: VoidFunction;
   customer: Customer;
+  isEditing?: boolean;
+  setLoading?: VoidFunction;
 }
 
-export function CustomerModal({ onClose, customer }: RegisterClientModalProps) {
+export function CustomerModal({
+  onClose,
+  customer,
+  isEditing,
+}: RegisterClientModalProps) {
   const [loading, setLoading] = useState(false);
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
     reset,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      nome: "",
+      telefone: "",
+      cpf: "",
+      cnpj: "",
+      cep: "",
+      endereco: "",
+      numero: "",
+      bairro: "",
+      cidade: "",
+      uf: "",
+    },
   });
+
+  useEffect(() => {
+    if (customer) {
+      const { id, ...rest } = customer;
+      Object.entries(rest).forEach(([key, value]) => {
+        setValue(key as any, value || "");
+      });
+    }
+  }, []);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -65,20 +93,38 @@ export function CustomerModal({ onClose, customer }: RegisterClientModalProps) {
       cnpj: data.cnpj.replace(/\D/g, ""),
       cep: data.cep.replace(/\D/g, ""),
     };
-    await api
-      .post("/client", formattedData)
-      .then((reponse) => {
-        reset();
-        onClose();
-        toast.success("Cliente cadastrado com sucesso.");
-      })
-      .catch((error) => {
-        console.error(error);
-        toast.error(error.response.data.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    console.log(formattedData);
+    if (isEditing) {
+      await api
+        .put(`/client/${customer?.id}`, formattedData)
+        .then((reponse) => {
+          reset();
+          onClose();
+          toast.success("Cadastro alterado com sucesso.");
+        })
+        .catch((error) => {
+          console.error(error);
+          toast.error(error.response.data.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      await api
+        .post("/client", formattedData)
+        .then((reponse) => {
+          reset();
+          onClose();
+          toast.success("Cadastro realizado com sucesso.");
+        })
+        .catch((error) => {
+          console.error(error);
+          toast.error(error.response.data.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
   };
 
   const handleCepChange = async (cep: string) => {
@@ -103,7 +149,7 @@ export function CustomerModal({ onClose, customer }: RegisterClientModalProps) {
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
-            {customer ? "Detalhes do" : "Cadastro de"} Cliente
+            {customer && !isEditing ? "Detalhes do" : "Cadastro de"} Cliente
           </DialogTitle>
           <DialogTrigger
             asChild
@@ -114,67 +160,73 @@ export function CustomerModal({ onClose, customer }: RegisterClientModalProps) {
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid gap-4">
-            <div className="grid gap-2">
+            <div className="grid gap-1">
               <Label htmlFor="name">Nome</Label>
               <Input
                 id="name"
                 {...register("nome")}
                 className={errors.nome ? "border-red-500" : ""}
+                disabled={customer && !isEditing ? true : false}
               />
               {errors.nome && (
-                <p className="text-sm text-red-500">{errors.nome.message}</p>
+                <p className="text-xs text-red-500">{errors.nome.message}</p>
               )}
             </div>
 
-            <div className="grid gap-2">
+            <div className="grid gap-1">
               <Label htmlFor="phone">Telefone</Label>
               <InputMask
                 mask="(99) 99999-9999"
                 {...register("telefone")}
+                value={watch("telefone") || ""}
+                disabled={customer && !isEditing ? true : false}
                 className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                   errors.telefone ? "border-red-500" : ""
                 }`}
               />
               {errors.telefone && (
-                <p className="text-sm text-red-500">
+                <p className="text-xs text-red-500">
                   {errors.telefone.message}
                 </p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
+              <div className="grid gap-1">
                 <Label htmlFor="cpf">CPF</Label>
                 <InputMask
                   mask="999.999.999-99"
                   {...register("cpf")}
+                  disabled={customer ? true : false}
                   className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                     errors.cpf ? "border-red-500" : ""
                   }`}
                 />
                 {errors.cpf && (
-                  <p className="text-sm text-red-500">{errors.cpf.message}</p>
+                  <p className="text-xs text-red-500">{errors.cpf.message}</p>
                 )}
               </div>
 
-              <div className="grid gap-2">
+              <div className="grid gap-1">
                 <Label htmlFor="cnpj">CNPJ</Label>
                 <InputMask
                   mask="99.999.999/9999-99"
+                  disabled={customer ? true : false}
                   {...register("cnpj")}
                   className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                     errors.cnpj ? "border-red-500" : ""
                   }`}
                 />
                 {errors.cnpj && (
-                  <p className="text-sm text-red-500">{errors.cnpj.message}</p>
+                  <p className="text-xs text-red-500">{errors.cnpj.message}</p>
                 )}
               </div>
             </div>
 
-            <div className="grid gap-2">
+            <div className="grid gap-1">
               <Label htmlFor="cep">CEP</Label>
               <InputMask
+                disabled={customer && !isEditing ? true : false}
                 mask="99999-999"
                 {...register("cep")}
                 onChange={(e) =>
@@ -185,89 +237,100 @@ export function CustomerModal({ onClose, customer }: RegisterClientModalProps) {
                 }`}
               />
               {errors.cep && (
-                <p className="text-sm text-red-500">{errors.cep.message}</p>
+                <p className="text-xs text-red-500">{errors.cep.message}</p>
               )}
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2 grid gap-2">
+            <div className="grid grid-cols-3 gap-2">
+              <div className="col-span-2 grid gap-1">
                 <Label htmlFor="address">Endereço</Label>
                 <Input
                   id="address"
+                  disabled
                   {...register("endereco")}
                   className={errors.endereco ? "border-red-500" : ""}
                 />
                 {errors.endereco && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-xs text-red-500">
                     {errors.endereco.message}
                   </p>
                 )}
               </div>
 
-              <div className="grid gap-2">
+              <div className="grid gap-1">
                 <Label htmlFor="number">Número</Label>
                 <Input
                   id="number"
+                  disabled={customer && !isEditing ? true : false}
                   {...register("numero")}
                   className={errors.numero ? "border-red-500" : ""}
                 />
                 {errors.numero && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-xs text-red-500">
                     {errors.numero.message}
                   </p>
                 )}
               </div>
             </div>
 
-            <div className="grid gap-2">
+            <div className="grid gap-1">
               <Label htmlFor="neighborhood">Bairro</Label>
               <Input
+                disabled
                 id="neighborhood"
                 {...register("bairro")}
                 className={errors.bairro ? "border-red-500" : ""}
               />
               {errors.bairro && (
-                <p className="text-sm text-red-500">{errors.bairro.message}</p>
+                <p className="text-xs text-red-500">{errors.bairro.message}</p>
               )}
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
-              <div className="col-span-3 grid gap-2">
+            <div className="grid grid-cols-4 gap-2">
+              <div className="col-span-3 grid gap-1">
                 <Label htmlFor="city">Cidade</Label>
                 <Input
+                  disabled
                   id="city"
                   {...register("cidade")}
                   className={errors.cidade ? "border-red-500" : ""}
                 />
                 {errors.cidade && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-xs text-red-500">
                     {errors.cidade.message}
                   </p>
                 )}
               </div>
 
-              <div className="grid gap-2">
+              <div className="grid gap-1">
                 <Label htmlFor="state">UF</Label>
                 <Input
+                  disabled
                   id="state"
                   {...register("uf")}
                   maxLength={2}
                   className={`uppercase ${errors.uf ? "border-red-500" : ""}`}
                 />
                 {errors.uf && (
-                  <p className="text-sm text-red-500">{errors.uf.message}</p>
+                  <p className="text-xs text-red-500">{errors.uf.message}</p>
                 )}
               </div>
             </div>
           </div>
 
           <div className="flex justify-end space-x-4 pt-4">
-            <Button type="button" variant="outline" onClick={() => onClose()}>
-              Cancelar
+            <Button
+              type="button"
+              variant={`${customer && !isEditing ? "default" : "outline"}`}
+              onClick={() => onClose()}
+            >
+              {customer && !isEditing ? "Fechar" : "Cancelar"}
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Salvando..." : "Salvar"}
-            </Button>
+            {(!customer || isEditing) && (
+              <Button type="submit" disabled={loading}>
+                {loading ? "Salvando..." : "Salvar"}
+              </Button>
+            )}
           </div>
         </form>
       </DialogContent>

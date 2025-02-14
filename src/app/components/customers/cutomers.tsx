@@ -1,6 +1,7 @@
 "use client";
+import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { CustomerModal } from "./customer-modal";
@@ -10,13 +11,16 @@ interface CustomersProps {
   customers: Customer[];
 }
 
-export default function Customers({ customers }: CustomersProps) {
+export default function Customers() {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    loadCustomers();
+  }, []);
   const handleOpenModal = (customer = null) => {
     setSelectedCustomer(customer);
 
@@ -26,6 +30,19 @@ export default function Customers({ customers }: CustomersProps) {
   const handleCloseModal = () => {
     setSelectedCustomer(null);
     setIsModalOpen(false);
+  };
+
+  const loadCustomers = async () => {
+    setLoading(true);
+    await api
+      .get("/customers")
+      .then((response) => {
+        setCustomers(response.data.customers);
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -45,11 +62,7 @@ export default function Customers({ customers }: CustomersProps) {
           className="w-full"
         />
       </div>
-      <CustomerTable
-        customers={customers}
-        onEdit={() => {}}
-        searchTerm={searchTerm}
-      />
+      <CustomerTable customers={customers} searchTerm={searchTerm} />
       <div className="w-full"></div>
       {isModalOpen && (
         <CustomerModal customer={selectedCustomer} onClose={handleCloseModal} />

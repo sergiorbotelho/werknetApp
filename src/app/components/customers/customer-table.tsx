@@ -4,6 +4,7 @@ import { Customer } from "@/types/customer";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import { LoadingSpinner } from "../ui/loading";
 import { ScrollArea } from "../ui/scroll-area";
 import {
   Table,
@@ -22,20 +23,14 @@ import {
 import { CustomerModal } from "./customer-modal";
 interface CustomerTableProps {
   customers: Customer[];
-  onEdit: (customer: Customer) => void;
   searchTerm: string;
 }
 
-export function CustomerTable({
-  onEdit,
-  searchTerm,
-  customers,
-}: CustomerTableProps) {
+export function CustomerTable({ searchTerm, customers }: CustomerTableProps) {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
     null
   );
   const [isEditing, setIsEditing] = useState(false);
-  const [editedCustomer, setEditedCustomer] = useState<Customer | null>(null);
 
   const filteredCustomers = customers?.filter(
     (customer) =>
@@ -53,18 +48,16 @@ export function CustomerTable({
   const handleEdit = (customer: Customer, event: React.MouseEvent) => {
     event.stopPropagation();
     setSelectedCustomer(customer);
-    setEditedCustomer(customer);
     setIsEditing(true);
   };
 
-  const handleSave = () => {
-    if (editedCustomer) {
-      onEdit(editedCustomer);
-      setIsEditing(false);
-      setSelectedCustomer(null);
-      setEditedCustomer(null);
-    }
-  };
+  if (customers.length < 1) {
+    return (
+      <div className="flex justify-center items-center h-[600px] max-w-6xl mx-auto w-full">
+        <LoadingSpinner size={60} />
+      </div>
+    );
+  }
 
   return (
     <ScrollArea className="h-[600px] ">
@@ -119,69 +112,9 @@ export function CustomerTable({
           <CustomerModal
             customer={selectedCustomer}
             onClose={() => setSelectedCustomer(null)}
+            isEditing={isEditing}
           />
         )}
-        {/* <Dialog
-          open={selectedCustomer !== null}
-          onOpenChange={(open) => !open && setSelectedCustomer(null)}
-        >
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>
-                {isEditing ? "Editar Cliente" : "Detalhes do Cliente"}
-              </DialogTitle>
-            </DialogHeader>
-            {selectedCustomer && (
-              <div className="grid gap-4 py-4">
-                {Object.entries(selectedCustomer).map(
-                  ([key, value]) =>
-                    key !== "id" && (
-                      <div
-                        key={key}
-                        className="grid grid-cols-4 items-center gap-4"
-                      >
-                        <Label htmlFor={key} className="text-right">
-                          {key.charAt(0).toUpperCase() + key.slice(1)}
-                        </Label>
-                        {isEditing ? (
-                          <Input
-                            id={key}
-                            value={
-                              editedCustomer?.[key as keyof Customer] || ""
-                            }
-                            onChange={(e) =>
-                              setEditedCustomer((prev) => ({
-                                ...prev!,
-                                [key]: e.target.value,
-                              }))
-                            }
-                            className="col-span-3"
-                          />
-                        ) : (
-                          <span className="col-span-3">{value}</span>
-                        )}
-                      </div>
-                    )
-                )}
-              </div>
-            )}
-            <DialogFooter>
-              {isEditing ? (
-                <>
-                  <Button onClick={() => setIsEditing(false)}>Cancelar</Button>
-                  <Button onClick={handleSave}>Salvar</Button>
-                </>
-              ) : (
-                <>
-                  <Button onClick={() => setSelectedCustomer(null)}>
-                    Fechar
-                  </Button>
-                  <Button onClick={() => setIsEditing(true)}>Editar</Button>
-                </>
-              )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog> */}
       </TooltipProvider>
     </ScrollArea>
   );

@@ -7,6 +7,7 @@ import { Input } from "@/app/components/ui/input";
 import { api } from "@/services/api/api";
 import { toast } from "react-toastify";
 import { IOrderService } from "../../../types/order";
+import { ServiceOrderModal } from "./serviceorder-modal";
 import { ServiceOrderTable } from "./serviceorder-table";
 
 export default function ServiceOrders() {
@@ -89,29 +90,10 @@ export default function ServiceOrders() {
           />
         </div>
         <ServiceOrderTable services={serviceOrders} searchTerm={searchTerm} />
-        {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {loading
-            ? Array(3)
-                .fill(0)
-                .map((_, index) => <ServiceOrderSkeleton key={index} />)
-            : filteredOrders
-                .reverse()
-                .map((order) => (
-                  <ServiceOrderCard
-                    key={order.id}
-                    order={order}
-                    onView={() => handleOpenModal(order)}
-                    onPrint={() => PdfOrder({ order })}
-                  />
-                ))}
-        </div> */}
-        {/* {isModalOpen && (
-          <ServiceOrderModal
-            order={selectedOrder}
-            onClose={handleCloseModal}
-            onSave={handleSaveOrder}
-          />
-        )} */}
+
+        {isModalOpen && (
+          <ServiceOrderModal order={selectedOrder} onClose={handleCloseModal} />
+        )}
       </div>
     </div>
   );

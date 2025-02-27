@@ -23,7 +23,7 @@ import { Customer } from "../../types/customer";
 import { CustomerModal } from "./customers/customer-modal";
 import { TimePicker } from "./timePicker";
 
-export function ServiceOrderModal({ order, onClose, onSave }) {
+export function ServiceOrderModalAntigo({ order, onClose, onSave }) {
   const [formData, setFormData] = useState(
     order
       ? {

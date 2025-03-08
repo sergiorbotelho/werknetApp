@@ -464,7 +464,7 @@ export function ServiceOrderModal({
             </div>
 
             <div className="flex justify-end gap-4">
-              <Button variant="outline" type="button">
+              <Button onClick={onClose} variant="outline" type="button">
                 Cancelar
               </Button>
               <Button type="submit">Alterar dados</Button>

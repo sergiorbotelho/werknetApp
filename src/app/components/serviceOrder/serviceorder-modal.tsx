@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/app/components/ui/dialog";
+import PdfOrder from "@/report/pdfOrder";
 import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
 import { IOrderService } from "@/types/order";
@@ -12,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Printer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import { z } from "zod";
 import {
   Form,
@@ -31,9 +33,9 @@ import {
 } from "../ui/select";
 
 const schema = z.object({
-  nome: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
+  nome: z.string(),
   horaChegada: z.string().min(1, "Hora de chegada é obrigatória"),
-  horaSaida: z.string().min(1, "Hora de saída é obrigatória"),
+  horaSaida: z.string(),
   modeloEquipamento: z.string().min(1, "Modelo do equipamento é obrigatório"),
   defeito: z.string().min(1, "Defeito é obrigatório"),
   contato: z.string().min(1, "Contato é obrigatório"),
@@ -62,22 +64,33 @@ export function ServiceOrderModal({
 }: RegisterClientModalProps) {
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
+
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      nome: "",
-      horaChegada: "",
-      horaSaida: "",
-      modeloEquipamento: "",
-      defeito: "",
-      contato: "",
-      defeitoConstatado: "",
-      solucao: "",
-      valServico: "",
-      valMaterial: "",
-      garantiaPeca: "",
-      garantiaServico: "",
-      tipoServico: "",
+      nome: order ? order.client.id.toString() : "",
+      horaChegada: order ? order.horaChegada : "",
+      horaSaida: order ? order.horaSaida : "",
+      modeloEquipamento: order ? order.modeloEquipamento : "",
+      defeito: order ? order.defeito : "",
+      contato: order ? order.contato : "",
+      defeitoConstatado: order ? order.defeitoConstatado : "",
+      solucao: order ? order.solucao : "",
+      valServico: order
+        ? Number(order.valServico).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          })
+        : "",
+      valMaterial: order
+        ? Number(order.valMaterial).toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL",
+          })
+        : "",
+      garantiaPeca: order ? order.garantiaPeca : "",
+      garantiaServico: order ? order.garantiaServico : "",
+      tipoServico: order ? order.tipoServico : "",
     },
   });
   console.log(order);
@@ -85,16 +98,32 @@ export function ServiceOrderModal({
   useEffect(() => {
     loadCustomers();
   }, []);
-  // useEffect(() => {
-  //   if (customer) {
-  //     const { id, ...rest } = customer;
-  //     Object.entries(rest).forEach(([key, value]) => {
-  //       setValue(key as any, value || "");
-  //     });
-  //   }
-  // }, []);
 
   const onSubmit = async () => {
+    const formData = form.getValues();
+
+    const data = {
+      cliente_id: Number(formData.nome),
+      contato: formData.contato,
+      modeloEquipamento: formData.modeloEquipamento,
+      tipoServico: formData.tipoServico,
+      defeito: formData.defeito,
+      defeitoConstatado: formData.defeitoConstatado,
+      solucao: formData.solucao,
+      valServico: formData.valServico,
+      valMaterial: formData.valMaterial,
+      garantiaPeca: formData.garantiaPeca,
+      garantiaServico: formData.garantiaServico,
+      horaChegada: formData.horaChegada,
+      horaSaida: formData.horaSaida,
+    };
+
+    const dataIsEditing = {
+      id: order.id,
+      ...data,
+    };
+
+    console.log(data);
     setLoading(true);
     // const formattedData = {
     //   ...data,
@@ -104,55 +133,35 @@ export function ServiceOrderModal({
     //   cep: data.cep.replace(/\D/g, ""),
     // };
 
-    // if (isEditing) {
-    //   await api
-    //     .put(`/client/${order?.id}`, formattedData)
-    //     .then((reponse) => {
-    //       reset();
-    //       onClose();
-    //       toast.success("Cadastro alterado com sucesso.");
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //       toast.error(error.response.data.message);
-    //     })
-    //     .finally(() => {
-    //       setLoading(false);
-    //     });
-    // } else {
-    //   await api
-    //     .post("/client", formattedData)
-    //     .then((reponse) => {
-    //       reset();
-    //       onClose();
-    //       toast.success("Cadastro realizado com sucesso.");
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //       toast.error(error.response.data.message);
-    //     })
-    //     .finally(() => {
-    //       setLoading(false);
-    //     });
-    // }
+    if (isEditing) {
+      await api
+        .put(`/os/${order?.id}`, dataIsEditing)
+        .then((reponse) => {
+          onClose();
+          toast.success("Cadastro alterado com sucesso.");
+        })
+        .catch((error) => {
+          console.error(error);
+          toast.error(error.response.data.message);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      await api
+        .post("/os", data)
+        .then((reponse) => {
+          onClose();
+          toast.success("Cadastro realizado com sucesso.");
+        })
+        .catch((error) => {
+          console.error(error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
   };
-
-  // const handleCepChange = async (cep: string) => {
-  //   if (cep.length === 8) {
-  //     try {
-  //       const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-  //       const data = await response.json();
-  //       if (!data.erro) {
-  //         setValue("endereco", data.logradouro);
-  //         setValue("bairro", data.bairro);
-  //         setValue("cidade", data.localidade);
-  //         setValue("uf", data.uf);
-  //       }
-  //     } catch (error) {
-  //       console.error("Erro ao buscar CEP:", error);
-  //     }
-  //   }
-  // };
 
   const loadCustomers = async () => {
     await api
@@ -170,8 +179,10 @@ export function ServiceOrderModal({
   //   setOpen(false);
   // };
 
-  const handlePrint = () => {
-    console.log("IMPRIMIR");
+  const handlePrint = (e: React.MouseEvent, order: IOrderService) => {
+    e.stopPropagation();
+
+    PdfOrder({ order });
   };
 
   return (
@@ -183,7 +194,7 @@ export function ServiceOrderModal({
             serviço
             {order && !isEditing && (
               <Button
-                onClick={() => handlePrint()}
+                onClick={(e) => handlePrint(e, order)}
                 variant="outline"
                 className="print-button"
               >
@@ -205,6 +216,7 @@ export function ServiceOrderModal({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={!!order}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -216,7 +228,10 @@ export function ServiceOrderModal({
                         <SelectItem value="loading">Carregando...</SelectItem>
                       ) : customers.length > 0 ? (
                         customers.map((client) => (
-                          <SelectItem key={client.id} value={client.nome}>
+                          <SelectItem
+                            key={client.id}
+                            value={client.id.toString()}
+                          >
                             {client.nome}
                           </SelectItem>
                         ))
@@ -278,9 +293,7 @@ export function ServiceOrderModal({
                   name="horaSaida"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>
-                        Hora Saída<span className="text-red-500">*</span>
-                      </FormLabel>
+                      <FormLabel>Hora Saída</FormLabel>
                       <FormControl>
                         <Input type="time" {...field} />
                       </FormControl>
@@ -325,9 +338,12 @@ export function ServiceOrderModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="warranty">Garantia</SelectItem>
-                        <SelectItem value="repair">Reparo</SelectItem>
-                        <SelectItem value="maintenance">Manutenção</SelectItem>
+                        <SelectItem value="FORADEGARANTIA">
+                          FORA DE GARANTIA
+                        </SelectItem>
+                        <SelectItem value="GARANTIA">GARANTIA</SelectItem>
+                        <SelectItem value="ORCAMENTO">ORÇAMENTO</SelectItem>
+                        <SelectItem value="CONTRATO">CONTRATO</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -357,9 +373,7 @@ export function ServiceOrderModal({
                 name="defeitoConstatado"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Defeito constatado<span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel>Defeito constatado</FormLabel>
                     <FormControl>
                       <Input placeholder="Defeito constatado" {...field} />
                     </FormControl>
@@ -374,9 +388,7 @@ export function ServiceOrderModal({
               name="solucao"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
-                    Solução<span className="text-red-500">*</span>
-                  </FormLabel>
+                  <FormLabel>Solução</FormLabel>
                   <FormControl>
                     <Input placeholder="Descrição da solução" {...field} />
                   </FormControl>
@@ -391,17 +403,9 @@ export function ServiceOrderModal({
                 name="valServico"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Valor do serviço<span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel>Valor do serviço</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="0.00"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        {...field}
-                      />
+                      <Input placeholder="R$ 0,00" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -412,17 +416,9 @@ export function ServiceOrderModal({
                 name="valMaterial"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Valor do material<span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel>Valor do material</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="0.00"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        {...field}
-                      />
+                      <Input placeholder="R$ 0,00" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -436,9 +432,7 @@ export function ServiceOrderModal({
                 name="garantiaPeca"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Garantia da peça<span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel>Garantia da peça</FormLabel>
                     <FormControl>
                       <Input placeholder="Período de garantia" {...field} />
                     </FormControl>
@@ -451,9 +445,7 @@ export function ServiceOrderModal({
                 name="garantiaServico"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Garantia do serviço<span className="text-red-500">*</span>
-                    </FormLabel>
+                    <FormLabel>Garantia do serviço</FormLabel>
                     <FormControl>
                       <Input placeholder="Período de garantia" {...field} />
                     </FormControl>
@@ -464,10 +456,18 @@ export function ServiceOrderModal({
             </div>
 
             <div className="flex justify-end gap-4">
-              <Button onClick={onClose} variant="outline" type="button">
-                Cancelar
+              <Button
+                type="button"
+                variant={`${order && !isEditing ? "default" : "outline"}`}
+                onClick={() => onClose()}
+              >
+                {order && !isEditing ? "Fechar" : "Cancelar"}
               </Button>
-              <Button type="submit">Alterar dados</Button>
+              {(!order || isEditing) && (
+                <Button type="submit" disabled={loading}>
+                  {loading ? "Salvando..." : "Salvar"}
+                </Button>
+              )}
             </div>
           </form>
         </Form>

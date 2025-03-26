@@ -1,7 +1,7 @@
 export interface IOrderService {
   id: number;
   contato: string;
-  horaEntrada: string;
+  horaChegada: string;
   horaSaida: string;
   defeito: string;
   defeitoConstatado: string;

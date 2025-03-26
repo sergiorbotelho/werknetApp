@@ -135,6 +135,7 @@ export function ServiceOrderTable({
           <ServiceOrderModal
             order={selectedService}
             onClose={() => setSelectedService(null)}
+            isEditing={isEditing}
           />
         )}
       </TooltipProvider>

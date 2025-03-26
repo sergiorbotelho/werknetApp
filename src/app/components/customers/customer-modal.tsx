@@ -161,7 +161,9 @@ export function CustomerModal({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid gap-4">
             <div className="grid gap-1">
-              <Label htmlFor="name">Nome</Label>
+              <Label htmlFor="name">
+                Nome<span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="name"
                 {...register("nome")}
@@ -174,7 +176,9 @@ export function CustomerModal({
             </div>
 
             <div className="grid gap-1">
-              <Label htmlFor="phone">Telefone</Label>
+              <Label htmlFor="phone">
+                Telefone<span className="text-red-500">*</span>
+              </Label>
               <InputMask
                 mask="(99) 99999-9999"
                 {...register("telefone")}
@@ -193,7 +197,9 @@ export function CustomerModal({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-1">
-                <Label htmlFor="cpf">CPF</Label>
+                <Label htmlFor="cpf">
+                  CPF<span className="text-red-500">*</span>
+                </Label>
                 <InputMask
                   mask="999.999.999-99"
                   {...register("cpf")}
@@ -208,7 +214,9 @@ export function CustomerModal({
               </div>
 
               <div className="grid gap-1">
-                <Label htmlFor="cnpj">CNPJ</Label>
+                <Label htmlFor="cnpj">
+                  CNPJ<span className="text-red-500">*</span>
+                </Label>
                 <InputMask
                   mask="99.999.999/9999-99"
                   disabled={customer ? true : false}
@@ -224,7 +232,9 @@ export function CustomerModal({
             </div>
 
             <div className="grid gap-1">
-              <Label htmlFor="cep">CEP</Label>
+              <Label htmlFor="cep">
+                CEP<span className="text-red-500">*</span>
+              </Label>
               <InputMask
                 disabled={customer && !isEditing ? true : false}
                 mask="99999-999"
@@ -243,7 +253,9 @@ export function CustomerModal({
 
             <div className="grid grid-cols-3 gap-2">
               <div className="col-span-2 grid gap-1">
-                <Label htmlFor="address">Endereço</Label>
+                <Label htmlFor="address">
+                  Endereço<span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="address"
                   disabled
@@ -258,7 +270,9 @@ export function CustomerModal({
               </div>
 
               <div className="grid gap-1">
-                <Label htmlFor="number">Número</Label>
+                <Label htmlFor="number">
+                  Número<span className="text-red-500">*</span>
+                </Label>
                 <Input
                   id="number"
                   disabled={customer && !isEditing ? true : false}
@@ -274,7 +288,9 @@ export function CustomerModal({
             </div>
 
             <div className="grid gap-1">
-              <Label htmlFor="neighborhood">Bairro</Label>
+              <Label htmlFor="neighborhood">
+                Bairro<span className="text-red-500">*</span>
+              </Label>
               <Input
                 disabled
                 id="neighborhood"
@@ -288,7 +304,9 @@ export function CustomerModal({
 
             <div className="grid grid-cols-4 gap-2">
               <div className="col-span-3 grid gap-1">
-                <Label htmlFor="city">Cidade</Label>
+                <Label htmlFor="city">
+                  Cidade<span className="text-red-500">*</span>
+                </Label>
                 <Input
                   disabled
                   id="city"
@@ -303,7 +321,9 @@ export function CustomerModal({
               </div>
 
               <div className="grid gap-1">
-                <Label htmlFor="state">UF</Label>
+                <Label htmlFor="state">
+                  UF<span className="text-red-500">*</span>
+                </Label>
                 <Input
                   disabled
                   id="state"

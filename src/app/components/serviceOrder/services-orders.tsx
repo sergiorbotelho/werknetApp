@@ -28,7 +28,7 @@ export default function ServiceOrders() {
         .get("os")
         .then((response) => {
           setServiceOrders(response.data.os);
-
+          console.log(response.data);
           setLoading(false);
         })
         .catch((error) => {

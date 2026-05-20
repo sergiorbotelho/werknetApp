@@ -16,12 +16,12 @@ import logo from "../../../public/logo.jpeg";
 
 import { Input } from "@/app/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2Icon } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { LoadingSpinner } from "../components/ui/loading";
 
 interface Inputs {
   email: string;
@@ -57,7 +57,7 @@ export default function Login() {
           : "Internal server error",
         {
           autoClose: 2000,
-        }
+        },
       );
       return;
     }
@@ -65,75 +65,88 @@ export default function Login() {
     setLoading(false);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-dvh w-full">
-        <LoadingSpinner size={60} />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex justify-center items-center h-dvh">
-      <Card className="max-w-xl w-full flex  m-8 flex-col justify-center items-center">
-        <CardHeader>
-          <Image
-            src={logo}
-            alt="Logomarca da empresa Werk"
-            width={280}
-            height={280}
-          />
-        </CardHeader>
-        <CardContent className="w-full -mt-4">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem className="mb-4 w-full">
-                    <FormLabel>E-mail</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="Digite seu email"
-                        {...register("email")}
-                        {...field}
-                      />
-                    </FormControl>
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 bg-hero opacity-90" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,oklch(0.72_0.12_195/0.3),transparent_50%)]" />
 
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Digite seu password"
-                        type="password"
-                        {...register("password")}
-                        {...field}
-                      />
-                    </FormControl>
+      <div className="relative grid md:grid-cols-2 gap-12 max-w-5xl w-full items-center">
+        <div className="text-primary-foreground hidden md:block space-y-6">
+          <h1 className="text-5xl font-bold leading-tight">
+            Gestão de Ordens de Serviço
+            <br />
+            <span className="text-accent">simples e poderosa.</span>
+          </h1>
+          <p className="text-lg opacity-90 max-w-md">
+            Cadastre clientes, abra ordens em segundos e acompanhe cada serviço
+            do primeiro contato à entrega.
+          </p>
+        </div>
 
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end">
-                <Button className="mt-6" type="submit">
+        <Card className="p-8 shadow-glow bg-card-gradient border-border/50">
+          <CardHeader className="-mt-10">
+            <Image
+              src={logo}
+              alt="Logomarca da empresa Werk"
+              width={280}
+              height={280}
+            />
+          </CardHeader>
+          <CardContent className="w-full">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4 -mt-10"
+              >
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className=" w-full">
+                      <FormLabel>E-mail</FormLabel>
+                      <FormControl>
+                        <Input
+                          className="w-full"
+                          placeholder="Digite seu email"
+                          {...register("email")}
+                          {...field}
+                        />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Digite seu password"
+                          type="password"
+                          {...register("password")}
+                          {...field}
+                        />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading && (
+                    <Loader2Icon className="h-4 w-4 mr-2 animate-spin" />
+                  )}
                   Entrar
                 </Button>
-              </div>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

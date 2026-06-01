@@ -12,7 +12,7 @@ import { ServiceOrderTable } from "./serviceorder-table";
 
 export default function ServiceOrders() {
   const [serviceOrders, setServiceOrders] = useState<IOrderService[] | null>(
-    []
+    [],
   );
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,7 @@ export default function ServiceOrders() {
     const loadOrders = async () => {
       setLoading(true);
       await api
-        .get("os")
+        .get("/os")
         .then((response) => {
           setServiceOrders(response.data.os);
           console.log(response.data);
@@ -59,7 +59,7 @@ export default function ServiceOrders() {
       const { id, client, created_at, ...data } = order;
 
       await api
-        .put(`/os/${id}`, data)
+        .put(`os/${id}`, data)
         .then((response) => {
           setRefresh(false);
           toast.success("OS atualizado com sucesso");

@@ -2,129 +2,101 @@
 
 import { Button } from "@/app/components/ui/button";
 import { cn } from "@/lib/utils";
-import { ChevronRight, LogOut, User, Wrench } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, Users2Icon, X } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useTheme } from "next-themes";
+import Image from "next/image";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 interface SidebarNavProps extends React.HTMLAttributes<HTMLDivElement> {}
-
+const nav = [
+  { to: "/", label: "Ordens de Serviço", icon: LayoutDashboard },
+  { to: "/customers", label: "Clientes", icon: Users2Icon },
+];
 export function SidebarNav({
   className,
 
   ...props
 }: SidebarNavProps) {
-  const { theme, setTheme } = useTheme();
-
   const [isExpanded, setIsExpanded] = useState(false);
   const path = usePathname();
-
-  const router = useRouter();
+  const route = useRouter();
   return (
-    <div
-      className={cn(
-        "flex h-screen flex-col items-start gap-4 border-r bg-background p-2 text-foreground transition-all  duration-300",
-        isExpanded ? "w-[200px]" : "w-[60px]",
-        className
+    <div className="min-h-screen flex ">
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "fixed md:static inset-y-0 left-0 z-40 w-72 bg-white text-primary-foreground flex flex-col transition-transform md:translate-x-0",
+          isExpanded ? "translate-x-0" : "-translate-x-full",
+        )}
+      >
+        <div className="p-2 bg-white flex items-center gap-3 border-b border-primary-foreground/10">
+          <div
+            className=" w-full rounded-xl bg-accent/30 flex items-center justify-center cursor-pointer"
+            onClick={() => route.push("/")}
+          >
+            <Image src="/logo.jpeg" alt="Logo" width={100} height={200} />
+          </div>
+          {/* <div>
+            <div className="font-bold tracking-tight">WerkNet</div>
+            <div className="text-xs opacity-70">Gestão de serviços</div>
+          </div> */}
+        </div>
+        <nav className="flex-1 p-4 space-y-1">
+          {nav.map((item, idx) => {
+            const active =
+              item.to === "/"
+                ? path === "/"
+                : path.startsWith(item.to) && item.to !== "/";
+            return (
+              <Link
+                key={idx}
+                href={item.to}
+                onClick={() => setIsExpanded(false)}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
+                  active
+                    ? "bg-accent text-white shadow-elegant"
+                    : "hover:bg-gray-300 text-black",
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                <span className="font-medium">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="p-4 border-t border-primary-foreground/10">
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-black hover:bg-gray-300 "
+            onClick={() => signOut()}
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sair
+          </Button>
+        </div>
+      </aside>
+
+      {isExpanded && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/40 z-30"
+          onClick={() => setIsExpanded(false)}
+        />
       )}
-      {...props}
-    >
-      <div className="flex w-full items-center justify-end">
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            "h-6 w-6 text-muted-foreground hover:text-foreground transition-transform",
-            isExpanded && "rotate-180"
-          )}
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-      </div>
 
-      <div
-        className={cn(
-          "flex flex-1 flex-col   items-start gap-4 w-full",
-          isExpanded ? "ml-4" : " ml-2"
-        )}
-      >
-        <NavButton
-          isActive={path === "/customers"}
-          icon={User}
-          label="Clientes"
-          isExpanded={isExpanded}
-          onClick={() => router.push("/customers")}
-        />
-        <NavButton
-          isActive={path === "/serviceorder"}
-          icon={Wrench}
-          label="Ordem de serviço"
-          isExpanded={isExpanded}
-          onClick={() => router.push("/serviceorder")}
-        />
-      </div>
-
-      <div
-        className={cn(
-          "flex flex-col items-start ml-4 gap-4 pb-4 w-full",
-          isExpanded ? "ml-4" : " ml-2"
-        )}
-      >
-        {/* <NavButton
-          icon={Settings}
-          label="Configurações"
-          isExpanded={isExpanded}
-          onClick={() => {}}
-        /> */}
-        <Button
-          variant="ghost"
-          className={cn(
-            "flex h-10 items-center gap-4 px-2 text-muted-foreground hover:text-foreground",
-            !isExpanded && "justify-center "
-          )}
-          onClick={() => signOut()}
-        >
-          <LogOut />
-          {isExpanded && <span>Sair</span>}
-        </Button>
-        {/* <NavButton
-          isActive={isActive}
-          icon={LogOut}
-          label="Sair"
-          isExpanded={isExpanded}
-          onClick={() => signOut()}
-        /> */}
+      <div className="flex-1 flex flex-col min-w-0 ">
+        <header className="md:hidden h-14 flex items-center px-4 border-b bg-card w-full absolute">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsExpanded(!isExpanded)}
+          >
+            {isExpanded ? <X /> : <Menu />}
+          </Button>
+          <span className="ml-2 font-semibold">WerkNet</span>
+        </header>
       </div>
     </div>
-  );
-}
-
-function NavButton({
-  icon: Icon,
-  label,
-  isExpanded,
-  isActive,
-  onClick,
-}: {
-  icon: React.ElementType;
-  label: string;
-  isExpanded: boolean;
-  isActive: boolean;
-  onClick: VoidFunction;
-}) {
-  return (
-    <Button
-      onClick={onClick}
-      variant="ghost"
-      className={cn(
-        "flex h-10 gap-4 px-2 text-muted-foreground ",
-        !isExpanded && "justify-center",
-        isActive && "bg-primary text-white hover:bg-primary hover:text-white"
-      )}
-    >
-      <Icon className="h-5 w-5 shrink-0" />
-      {isExpanded && <span>{label}</span>}
-    </Button>
   );
 }

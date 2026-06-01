@@ -67,7 +67,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-hero opacity-90" />
+      <div className="min-h-screen absolute inset-0 bg-hero opacity-90" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,oklch(0.72_0.12_195/0.3),transparent_50%)]" />
 
       <div className="relative grid md:grid-cols-2 gap-12 max-w-5xl w-full items-center">

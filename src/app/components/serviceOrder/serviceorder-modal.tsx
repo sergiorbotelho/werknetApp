@@ -119,7 +119,7 @@ export function ServiceOrderModal({
     };
 
     const dataIsEditing = {
-      id: order.id,
+      id: order?.id,
       ...data,
     };
 
@@ -135,7 +135,7 @@ export function ServiceOrderModal({
 
     if (isEditing) {
       await api
-        .put(`/os/${order?.id}`, dataIsEditing)
+        .put(`os/${order?.id}`, dataIsEditing)
         .then((reponse) => {
           onClose();
           toast.success("Cadastro alterado com sucesso.");
@@ -149,12 +149,13 @@ export function ServiceOrderModal({
         });
     } else {
       await api
-        .post("/os", data)
+        .post("os", data)
         .then((reponse) => {
           onClose();
           toast.success("Cadastro realizado com sucesso.");
         })
         .catch((error) => {
+          toast.error("Erro ao cadastrar ordem de serviço. Tente novamente.");
           console.error(error);
         })
         .finally(() => {
@@ -165,7 +166,7 @@ export function ServiceOrderModal({
 
   const loadCustomers = async () => {
     await api
-      .get("/customers")
+      .get("customers")
       .then((response) => {
         setCustomers(response.data.customers);
       })

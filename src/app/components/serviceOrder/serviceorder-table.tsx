@@ -34,7 +34,7 @@ export function ServiceOrderTable({
   services,
 }: CustomerTableProps) {
   const [selectedService, setSelectedService] = useState<IOrderService | null>(
-    null
+    null,
   );
 
   const [isEditing, setIsEditing] = useState(false);
@@ -42,7 +42,7 @@ export function ServiceOrderTable({
   const filteredOrders = services.filter(
     (order) =>
       order.id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.client.nome.toLowerCase().includes(searchTerm.toLowerCase())
+      order.client.nome.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleRowClick = (service: IOrderService) => {

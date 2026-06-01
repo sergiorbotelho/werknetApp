@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 import { ThemeProvider } from "../../providers/theme-provider";
-import { Header } from "../components/header";
 
 export default async function PrivateLayout({
   children,
@@ -21,8 +20,8 @@ export default async function PrivateLayout({
       {/* <SheetMenu /> */}
       <div className="flex">
         <SidebarNav />
-        <div className="flex flex-col flex-1">
-          <Header />
+        <div className="flex flex-col md:mt-0 mt-10 flex-1">
+          {/* <Header /> */}
           {children}
         </div>
       </div>

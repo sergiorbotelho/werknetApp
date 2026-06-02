@@ -96,7 +96,7 @@ export function CustomerModal({
     console.log(formattedData);
     if (isEditing) {
       await api
-        .put(`/client/${customer?.id}`, formattedData)
+        .put(`/customer/${customer?.id}`, formattedData)
         .then((reponse) => {
           reset();
           onClose();
@@ -111,7 +111,7 @@ export function CustomerModal({
         });
     } else {
       await api
-        .post("/client", formattedData)
+        .post("/customer", formattedData)
         .then((reponse) => {
           reset();
           onClose();

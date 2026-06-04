@@ -17,19 +17,30 @@ import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { toast } from "react-toastify";
 import { z } from "zod";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../ui/alert-dialog";
 
 const schema = z
   .object({
     nome: z.string().min(3, "Nome deve ter no mínimo 3 caracteres"),
+    email: z.string().email("Digite um e-mail válido"),
     telefone: z.string().regex(/^\(\d{2}\) \d{5}-\d{4}$/, "Telefone inválido"),
     cpf: z.string().optional(),
     cnpj: z.string().optional(),
-    cep: z.string().min(8, "CEP inválido"),
-    endereco: z.string().min(3, "Endereço é obrigatório"),
-    numero: z.string().min(1, "Número é obrigatório"),
-    bairro: z.string().min(2, "Bairro é obrigatório"),
-    cidade: z.string().min(2, "Cidade é obrigatória"),
-    uf: z.string().length(2, "UF é obrigatória"),
+    cep: z.string().optional(),
+    endereco: z.string().optional(),
+    numero: z.string().optional(),
+    bairro: z.string().optional(),
+    cidade: z.string().optional(),
+    uf: z.string().max(2).optional(),
   })
   .refine((data) => data.cpf || data.cnpj, {
     message: "CPF ou CNPJ é obrigatório",
@@ -42,16 +53,17 @@ interface RegisterClientModalProps {
   onClose: VoidFunction;
   customer: Customer;
   isEditing?: boolean;
-  setLoading?: VoidFunction;
+  loadCustomers: () => Promise<void>;
 }
 
 export function CustomerModal({
   onClose,
   customer,
   isEditing,
+  loadCustomers,
 }: RegisterClientModalProps) {
   const [loading, setLoading] = useState(false);
-
+  const [openAlertDialog, setOpenAlertDialog] = useState(false);
   const {
     register,
     handleSubmit,
@@ -63,6 +75,7 @@ export function CustomerModal({
     resolver: zodResolver(schema),
     defaultValues: {
       nome: "",
+      email: "",
       telefone: "",
       cpf: "",
       cnpj: "",
@@ -98,6 +111,7 @@ export function CustomerModal({
       await api
         .put(`/customer/${customer?.id}`, formattedData)
         .then((reponse) => {
+          loadCustomers();
           reset();
           onClose();
           toast.success("Cadastro alterado com sucesso.");
@@ -113,6 +127,7 @@ export function CustomerModal({
       await api
         .post("/customer", formattedData)
         .then((reponse) => {
+          loadCustomers();
           reset();
           onClose();
           toast.success("Cadastro realizado com sucesso.");
@@ -125,6 +140,25 @@ export function CustomerModal({
           setLoading(false);
         });
     }
+  };
+
+  const handleExcluir = async () => {
+    if (!isEditing) return onClose();
+    setLoading(true);
+    await api
+      .delete(`/customer/${customer?.id}`)
+      .then((response) => {
+        loadCustomers();
+        setOpenAlertDialog(false);
+        reset();
+        onClose();
+        toast.success("Cliente excluido com sucesso.");
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error(error.response.data.message);
+      })
+      .finally(() => setLoading(false));
   };
 
   const handleCepChange = async (cep: string) => {
@@ -172,6 +206,20 @@ export function CustomerModal({
               />
               {errors.nome && (
                 <p className="text-xs text-red-500">{errors.nome.message}</p>
+              )}
+            </div>
+            <div className="grid gap-1">
+              <Label htmlFor="email">
+                Email<span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="email"
+                {...register("email")}
+                className={errors.email ? "border-red-500" : ""}
+                disabled={customer && !isEditing ? true : false}
+              />
+              {errors.email && (
+                <p className="text-xs text-red-500">{errors.email.message}</p>
               )}
             </div>
 
@@ -232,9 +280,7 @@ export function CustomerModal({
             </div>
 
             <div className="grid gap-1">
-              <Label htmlFor="cep">
-                CEP<span className="text-red-500">*</span>
-              </Label>
+              <Label htmlFor="cep">CEP</Label>
               <InputMask
                 disabled={customer && !isEditing ? true : false}
                 mask="99999-999"
@@ -253,12 +299,9 @@ export function CustomerModal({
 
             <div className="grid grid-cols-3 gap-2">
               <div className="col-span-2 grid gap-1">
-                <Label htmlFor="address">
-                  Endereço<span className="text-red-500">*</span>
-                </Label>
+                <Label htmlFor="address">Endereço</Label>
                 <Input
                   id="address"
-                  disabled
                   {...register("endereco")}
                   className={errors.endereco ? "border-red-500" : ""}
                 />
@@ -270,12 +313,9 @@ export function CustomerModal({
               </div>
 
               <div className="grid gap-1">
-                <Label htmlFor="number">
-                  Número<span className="text-red-500">*</span>
-                </Label>
+                <Label htmlFor="number">Número</Label>
                 <Input
                   id="number"
-                  disabled={customer && !isEditing ? true : false}
                   {...register("numero")}
                   className={errors.numero ? "border-red-500" : ""}
                 />
@@ -288,11 +328,8 @@ export function CustomerModal({
             </div>
 
             <div className="grid gap-1">
-              <Label htmlFor="neighborhood">
-                Bairro<span className="text-red-500">*</span>
-              </Label>
+              <Label htmlFor="neighborhood">Bairro</Label>
               <Input
-                disabled
                 id="neighborhood"
                 {...register("bairro")}
                 className={errors.bairro ? "border-red-500" : ""}
@@ -304,11 +341,8 @@ export function CustomerModal({
 
             <div className="grid grid-cols-4 gap-2">
               <div className="col-span-3 grid gap-1">
-                <Label htmlFor="city">
-                  Cidade<span className="text-red-500">*</span>
-                </Label>
+                <Label htmlFor="city">Cidade</Label>
                 <Input
-                  disabled
                   id="city"
                   {...register("cidade")}
                   className={errors.cidade ? "border-red-500" : ""}
@@ -321,11 +355,8 @@ export function CustomerModal({
               </div>
 
               <div className="grid gap-1">
-                <Label htmlFor="state">
-                  UF<span className="text-red-500">*</span>
-                </Label>
+                <Label htmlFor="state">UF</Label>
                 <Input
-                  disabled
                   id="state"
                   {...register("uf")}
                   maxLength={2}
@@ -341,10 +372,10 @@ export function CustomerModal({
           <div className="flex justify-end space-x-4 pt-4">
             <Button
               type="button"
-              variant={`${customer && !isEditing ? "default" : "outline"}`}
-              onClick={() => onClose()}
+              variant={`${customer && !isEditing ? "default" : "destructive"}`}
+              onClick={() => setOpenAlertDialog(true)}
             >
-              {customer && !isEditing ? "Fechar" : "Cancelar"}
+              {isEditing ? "Excluir" : "Fechar"}
             </Button>
             {(!customer || isEditing) && (
               <Button type="submit" disabled={loading}>
@@ -354,6 +385,28 @@ export function CustomerModal({
           </div>
         </form>
       </DialogContent>
+      <AlertDialog open={openAlertDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir cliente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza de que deseja excluir o cliente{" "}
+              {customer?.nome.toUpperCase()}? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="bg-destructive text-white hover:bg-destructive hover:opacity-60 hover:text-white"
+              onClick={() => setOpenAlertDialog(false)}
+            >
+              Não
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleExcluir}>
+              {loading ? "Excluindo..." : "Sim"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

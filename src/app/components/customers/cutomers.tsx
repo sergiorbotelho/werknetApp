@@ -16,19 +16,19 @@ import { Card } from "../ui/card";
 import { Input } from "../ui/input";
 import { CustomerModal } from "./customer-modal";
 
-interface CustomersProps {
-  customers: Customer[];
-}
+// interface CustomersProps {
+//   customers: Customer[];
+// }
 
-type Cliente = {
-  id: string;
-  nome: string;
-  contato: string | null;
-  email: string | null;
-  endereco: string | null;
-  observacoes: string | null;
-  os_count?: number;
-};
+// type Cliente = {
+//   id: string;
+//   nome: string;
+//   contato: string | null;
+//   email: string | null;
+//   endereco: string | null;
+//   observacoes: string | null;
+//   os_count?: number;
+// };
 
 export default function Customers() {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -40,13 +40,9 @@ export default function Customers() {
   useEffect(() => {
     loadCustomers();
   }, []);
-  const handleOpenModal = (customer = null) => {
-    setSelectedCustomer(customer);
-
-    setIsModalOpen(true);
-  };
 
   const handleCloseModal = () => {
+    setIsEditing(false);
     setSelectedCustomer(null);
     setIsModalOpen(false);
   };
@@ -124,7 +120,7 @@ export default function Customers() {
         )}
 
         {!loading && filtered.length === 0 && (
-          <Card className="col-span-full p-12 text-center">
+          <Card className="col-span-full p-12 text-center -mt-4">
             <Users className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
             <p className="text-muted-foreground">Nenhum cliente cadastrado.</p>
           </Card>
@@ -133,7 +129,7 @@ export default function Customers() {
         {filtered.map((c) => (
           <Card
             key={c.id}
-            className="p-4 sm:p-5 hover:shadow-elegant transition-all bg-card-gradient group cursor-pointer"
+            className="p-4 -mt-4 sm:p-5 hover:shadow-elegant transition-all bg-card-gradient group cursor-pointer"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -161,20 +157,15 @@ export default function Customers() {
             </div>
 
             <div className="mt-4 space-y-2 text-sm text-muted-foreground">
-              {c.telefone && (
-                <div className="flex items-center gap-2 break-all">
-                  <Phone className="h-3.5 w-3.5 shrink-0" />
-                  <span>{c.telefone}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2 break-all">
+                <Phone className="h-3.5 w-3.5 shrink-0" />
+                <span>{c.telefone}</span>
+              </div>
 
-              {c.cpf ||
-                (c.cnpj && (
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Mail className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">sergio@gmail.com</span>
-                  </div>
-                ))}
+              <div className="flex items-center gap-2 min-w-0">
+                <Mail className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{c.email}</span>
+              </div>
 
               {c.endereco && (
                 <div className="flex items-start gap-2 min-w-0">
@@ -191,6 +182,7 @@ export default function Customers() {
       {(isModalOpen || selectedCustomer !== null) && (
         <CustomerModal
           customer={selectedCustomer}
+          loadCustomers={loadCustomers}
           onClose={handleCloseModal}
           isEditing={isEditing}
         />

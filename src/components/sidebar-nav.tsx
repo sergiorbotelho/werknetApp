@@ -13,11 +13,7 @@ const nav = [
   { to: "/", label: "Ordens de Serviço", icon: LayoutDashboard },
   { to: "/customers", label: "Clientes", icon: Users2Icon },
 ];
-export function SidebarNav({
-  className,
-
-  ...props
-}: SidebarNavProps) {
+export function SidebarNav({ className, ...props }: SidebarNavProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const path = usePathname();
   const route = useRouter();
@@ -37,10 +33,6 @@ export function SidebarNav({
           >
             <Image src="/logo.jpeg" alt="Logo" width={100} height={200} />
           </div>
-          {/* <div>
-            <div className="font-bold tracking-tight">WerkNet</div>
-            <div className="text-xs opacity-70">Gestão de serviços</div>
-          </div> */}
         </div>
         <nav className="flex-1 p-4 space-y-1">
           {nav.map((item, idx) => {
@@ -56,7 +48,7 @@ export function SidebarNav({
                 className={cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl transition-all",
                   active
-                    ? "bg-accent text-white shadow-elegant"
+                    ? "bg-primary text-white shadow-elegant"
                     : "hover:bg-gray-300 text-black",
                 )}
               >
@@ -91,6 +83,7 @@ export function SidebarNav({
             variant="ghost"
             size="icon"
             onClick={() => setIsExpanded(!isExpanded)}
+            className="hover:bg-primary hover:text-white"
           >
             {isExpanded ? <X /> : <Menu />}
           </Button>

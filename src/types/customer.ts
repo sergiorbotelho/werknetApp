@@ -11,4 +11,5 @@ export interface Customer {
   cidade: string;
   uf: string;
   cep: string;
+  totalOs: number;
 }

@@ -139,10 +139,12 @@ export default function Customers() {
 
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold truncate">{c.nome}</div>
-
-                  <div className="text-xs text-muted-foreground">
-                    2 ordem(ns) de serviço
-                  </div>
+                  {c.totalOs > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      {c.totalOs} orde
+                      {c.totalOs == 1 ? "m" : "ns"} de serviço
+                    </div>
+                  )}
                 </div>
               </div>
 

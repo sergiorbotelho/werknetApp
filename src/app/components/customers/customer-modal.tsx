@@ -91,11 +91,26 @@ export function CustomerModal({
   useEffect(() => {
     if (customer) {
       const { id, ...rest } = customer;
+
       Object.entries(rest).forEach(([key, value]) => {
-        setValue(key as any, value || "");
+        if (key === "telefone" && value) {
+          const phone = String(value).replace(/\D/g, "");
+
+          setValue(
+            "telefone",
+            phone.replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3"),
+            { shouldValidate: true },
+          );
+
+          return;
+        }
+
+        setValue(key as any, value || "", {
+          shouldValidate: true,
+        });
       });
     }
-  }, []);
+  }, [customer, setValue]);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -106,11 +121,10 @@ export function CustomerModal({
       cnpj: data.cnpj.replace(/\D/g, ""),
       cep: data.cep.replace(/\D/g, ""),
     };
-    console.log(formattedData);
     if (isEditing) {
       await api
         .put(`/customer/${customer?.id}`, formattedData)
-        .then((reponse) => {
+        .then(() => {
           loadCustomers();
           reset();
           onClose();
@@ -126,7 +140,7 @@ export function CustomerModal({
     } else {
       await api
         .post("/customer", formattedData)
-        .then((reponse) => {
+        .then(() => {
           loadCustomers();
           reset();
           onClose();
@@ -147,7 +161,7 @@ export function CustomerModal({
     setLoading(true);
     await api
       .delete(`/customer/${customer?.id}`)
-      .then((response) => {
+      .then(() => {
         loadCustomers();
         setOpenAlertDialog(false);
         reset();
@@ -224,14 +238,13 @@ export function CustomerModal({
             </div>
 
             <div className="grid gap-1">
-              <Label htmlFor="phone">
+              <Label htmlFor="telefone">
                 Telefone<span className="text-red-500">*</span>
               </Label>
               <InputMask
                 mask="(99) 99999-9999"
                 {...register("telefone")}
                 value={watch("telefone") || ""}
-                disabled={customer && !isEditing ? true : false}
                 className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                   errors.telefone ? "border-red-500" : ""
                 }`}

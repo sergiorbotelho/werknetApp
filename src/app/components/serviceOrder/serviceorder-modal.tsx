@@ -33,7 +33,11 @@ import {
 } from "../ui/select";
 
 const schema = z.object({
-  nome: z.string(),
+  nome: z
+    .string({
+      required_error: "Por favor, selecione um cliente.",
+    })
+    .min(1, "Por favor, selecione um cliente."),
   horaChegada: z.string().min(1, "Hora de chegada é obrigatória"),
   horaSaida: z.string(),
   modeloEquipamento: z.string().min(1, "Modelo do equipamento é obrigatório"),
@@ -45,7 +49,11 @@ const schema = z.object({
   valMaterial: z.string(),
   garantiaPeca: z.string(),
   garantiaServico: z.string(),
-  tipoServico: z.string(),
+  tipoServico: z
+    .string({
+      required_error: "Por favor, selecione o tipo de serviço.",
+    })
+    .min(1, "Por favor, selecione o tipo de serviço."),
 });
 
 type ServiceFormValues = z.infer<typeof schema>;
@@ -98,7 +106,7 @@ export function ServiceOrderModal({
   useEffect(() => {
     loadCustomers();
   }, []);
-
+  console.log();
   const onSubmit = async () => {
     const formData = form.getValues();
 
@@ -110,8 +118,8 @@ export function ServiceOrderModal({
       defeito: formData.defeito,
       defeitoConstatado: formData.defeitoConstatado,
       solucao: formData.solucao,
-      valServico: formData.valServico,
-      valMaterial: formData.valMaterial,
+      valServico: formData.valServico !== "" ? formData.valServico : 0,
+      valMaterial: formData.valMaterial !== "" ? formData.valMaterial : 0,
       garantiaPeca: formData.garantiaPeca,
       garantiaServico: formData.garantiaServico,
       horaChegada: formData.horaChegada,
@@ -125,13 +133,6 @@ export function ServiceOrderModal({
 
     console.log(data);
     setLoading(true);
-    // const formattedData = {
-    //   ...data,
-    //   telefone: data.telefone.replace(/\D/g, ""), // Remove tudo que não for número
-    //   cpf: data.cpf.replace(/\D/g, ""),
-    //   cnpj: data.cnpj.replace(/\D/g, ""),
-    //   cep: data.cep.replace(/\D/g, ""),
-    // };
 
     if (isEditing) {
       await api
@@ -175,11 +176,6 @@ export function ServiceOrderModal({
       });
   };
 
-  // const handleCustomerSelect = (customerName:string) => {
-  //   setValue({ nome: customerName, ...value});
-  //   setOpen(false);
-  // };
-
   const handlePrint = (e: React.MouseEvent, order: IOrderService) => {
     e.stopPropagation();
 
@@ -217,6 +213,7 @@ export function ServiceOrderModal({
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    value={field.value}
                     disabled={!!order}
                   >
                     <FormControl>
@@ -331,6 +328,7 @@ export function ServiceOrderModal({
                     </FormLabel>
                     <Select
                       onValueChange={field.onChange}
+                      value={field.value}
                       defaultValue={field.value}
                     >
                       <FormControl>
@@ -347,6 +345,7 @@ export function ServiceOrderModal({
                         <SelectItem value="CONTRATO">CONTRATO</SelectItem>
                       </SelectContent>
                     </Select>
+
                     <FormMessage />
                   </FormItem>
                 )}

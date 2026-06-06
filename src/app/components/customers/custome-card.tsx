@@ -32,9 +32,9 @@ export const CardCustomer = ({
       {filtered.map((c) => (
         <Card
           key={c.id}
-          className="p-4 -mt-4 sm:p-5 hover:shadow-elegant transition-all bg-card-gradient group cursor-pointer"
+          className="p-4 sm:p-5 hover:shadow-elegant transition-all bg-card-gradient cursor-pointer"
         >
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between ">
             <div className="flex items-start gap-3 min-w-0 flex-1">
               <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-hero text-primary-foreground flex items-center justify-center font-bold shrink-0">
                 {c.nome.charAt(0).toUpperCase()}

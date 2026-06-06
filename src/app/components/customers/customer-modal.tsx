@@ -384,7 +384,7 @@ export function CustomerModal({
             <Button
               type="button"
               variant={`${customer && !isEditing ? "default" : "destructive"}`}
-              onClick={() => setOpenAlertDialog(true)}
+              onClick={isEditing ? () => setOpenAlertDialog(true) : onClose}
             >
               {isEditing ? "Excluir" : "Fechar"}
             </Button>

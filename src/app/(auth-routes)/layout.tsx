@@ -20,10 +20,7 @@ export default async function PrivateLayout({
       {/* <SheetMenu /> */}
       <div className="flex">
         <SidebarNav />
-        <div className="flex flex-col md:mt-0 mt-10 flex-1">
-          {/* <Header /> */}
-          {children}
-        </div>
+        <div className="flex flex-col md:mt-0 mt-10 flex-1">{children}</div>
       </div>
     </ThemeProvider>
   );

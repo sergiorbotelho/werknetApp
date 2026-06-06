@@ -1,31 +1,36 @@
 import { Button } from "@/app/components/ui/button";
-import Image from "next/image";
-import Link from "next/link";
-import logo from "../../../public/logo.jpeg";
-export function Header() {
+import { Plus } from "lucide-react";
+
+interface HeaderProps {
+  title: string;
+  description: string;
+  titleButton: string;
+  setIsModalOpen: (open: boolean) => void;
+}
+
+export function Header({
+  title,
+  description,
+  titleButton,
+  setIsModalOpen,
+}: HeaderProps) {
   return (
-    <header className=" border-b hidden md:block ">
-      <div className="max-w-6xl mx-auto px-4 py-2 flex justify-between items-center">
-        <Link href="/" className="flex items-center space-x-2">
-          <Image alt="Logo WerkNet" src={logo} width={200} />
-        </Link>
-        <nav className="flex items-center space-x-4">
-          <Button
-            variant="default"
-            className="bg-blue-100 text-black font-semibold hover:bg-blue-200"
-            asChild
-          >
-            <Link href="/customers">Cliente</Link>
-          </Button>
-          <Button
-            variant="default"
-            className="bg-green-100 text-black font-semibold hover:bg-green-200"
-            asChild
-          >
-            <Link href="/serviceorder">Ordem de Serviço</Link>
-          </Button>
-        </nav>
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="space-y-1 min-w-0">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-foreground break-words">
+          {title}
+        </h1>
+        <p className="text-sm text-muted-foreground">{description}</p>
       </div>
+
+      <Button
+        size="lg"
+        className="w-full sm:w-auto shadow-elegant justify-center transition-transform active:scale-95"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <Plus className="h-4 w-4 mr-2 shrink-0" />
+        {titleButton}
+      </Button>
     </header>
   );
 }

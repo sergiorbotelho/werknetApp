@@ -1,35 +1,51 @@
-import { Button } from "./ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "./ui/dialog";
-
-export function ConfirmationModal({
-  isOpen,
-  onClose,
-  onConfirm,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
+interface ConfirmationDialogProps {
+  title: string;
+  description: string;
+  loading: boolean;
+  openAlertDialog: boolean;
+  setOpenAlertDialog: (value: boolean) => void;
+  handleExcluir: () => Promise<void>;
+}
+export function ConfirmationDialog({
+  loading,
+  openAlertDialog,
+  setOpenAlertDialog,
+  handleExcluir,
   title,
-  message,
-}) {
+  description,
+}: ConfirmationDialogProps) {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent aria-description="Excluir cliente">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-        <p>{message}</p>
-        <DialogFooter className="flex flex-col gap-2">
-          <Button variant="outline" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button variant="destructive" onClick={onConfirm}>
-            Confirmar
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <AlertDialog open={openAlertDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription className="flex flex-col gap-2">
+            {description}
+            <p className="text-gray-400">* Esta ação não pode ser desfeita.</p>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            className="bg-destructive text-white hover:bg-destructive hover:opacity-60 hover:text-white"
+            onClick={() => setOpenAlertDialog(false)}
+          >
+            Não
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={handleExcluir}>
+            {loading ? "Excluindo..." : "Sim"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

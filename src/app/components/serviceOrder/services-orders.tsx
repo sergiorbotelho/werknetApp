@@ -6,7 +6,6 @@ import { Input } from "@/app/components/ui/input";
 import PdfOrder from "@/report/pdfOrder";
 import { api } from "@/services/api/api";
 import { Search } from "lucide-react";
-import { toast } from "react-toastify";
 import { IOrderService } from "../../../types/order";
 import { Header } from "../header";
 import { Card } from "../ui/card";
@@ -21,60 +20,31 @@ export default function ServiceOrders() {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isNewOrder, setIsNewOrder] = useState(false);
-  const [refresh, setRefresh] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [q, setQ] = useState("");
 
   useEffect(() => {
-    const loadOrders = async () => {
-      setLoading(true);
-      await api
-        .get("/os")
-        .then((response) => {
-          setServiceOrders(response.data.os);
-          console.log(response.data);
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error(error);
-          setLoading(false);
-        });
-    };
     loadOrders();
-  }, [refresh]);
-
-  const handleOpenModal = (order = null) => {
-    setSelectedOrder(order);
-    setIsNewOrder(!order);
-    setIsModalOpen(true);
+  }, []);
+  const loadOrders = async () => {
+    setLoading(true);
+    await api
+      .get("/os")
+      .then((response) => {
+        setServiceOrders(response.data.os.toReversed());
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error(error);
+        setLoading(false);
+      });
   };
 
   const handleCloseModal = () => {
     setSelectedOrder(null);
     setIsModalOpen(false);
+    setIsEditing(false);
   };
 
-  const handleSaveOrder = async (order: IOrderService) => {
-    setRefresh(true);
-    if (isNewOrder) {
-      console.log(order);
-    }
-    if (!isNewOrder) {
-      const { id, client, created_at, ...data } = order;
-
-      await api
-        .put(`os/${id}`, data)
-        .then((response) => {
-          setRefresh(false);
-          toast.success("OS atualizado com sucesso");
-        })
-        .catch((error) => {
-          setRefresh(false);
-          console.error(error);
-        });
-    }
-  };
   const filtered = useMemo(() => {
     if (!q.trim()) return serviceOrders;
     const t = q.toLowerCase();
@@ -105,7 +75,7 @@ export default function ServiceOrders() {
       <Header
         title="Ordem de serviço"
         description="Acompanhe e gerencie todos os seus atendimentos"
-        titleButton="Nova OS"
+        titleButton="Nova Ordem de serviço"
         setIsModalOpen={setIsModalOpen}
       />
 
@@ -132,6 +102,7 @@ export default function ServiceOrders() {
           order={selectedOrder}
           onClose={handleCloseModal}
           isEditing={isEditing}
+          loadOrders={loadOrders}
         />
       )}
     </div>

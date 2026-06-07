@@ -17,16 +17,7 @@ import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { toast } from "react-toastify";
 import { z } from "zod";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "../ui/alert-dialog";
+import { ConfirmationDialog } from "../confirmation-modal";
 
 const schema = z
   .object({
@@ -194,7 +185,7 @@ export function CustomerModal({
 
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] h-[80%] overflow-auto md:h-fit w-[95%] md:w-fit">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold">
             {customer && !isEditing ? "Detalhes do" : "Cadastro de"} Cliente
@@ -396,28 +387,15 @@ export function CustomerModal({
           </div>
         </form>
       </DialogContent>
-      <AlertDialog open={openAlertDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Excluir cliente?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza de que deseja excluir o cliente{" "}
-              {customer?.nome.toUpperCase()}? Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              className="bg-destructive text-white hover:bg-destructive hover:opacity-60 hover:text-white"
-              onClick={() => setOpenAlertDialog(false)}
-            >
-              Não
-            </AlertDialogCancel>
-            <AlertDialogAction onClick={handleExcluir}>
-              {loading ? "Excluindo..." : "Sim"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmationDialog
+        title="Excluir cliente?"
+        description={`Tem certeza de que deseja excluir o cliente
+              ${customer?.nome.toUpperCase()}? `}
+        loading={loading}
+        openAlertDialog={openAlertDialog}
+        setOpenAlertDialog={setOpenAlertDialog}
+        handleExcluir={handleExcluir}
+      />
     </Dialog>
   );
 }

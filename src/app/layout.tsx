@@ -34,7 +34,7 @@ export default async function RootLayout({
               disableTransitionOnChange
             >
               {children}
-              <ToastContainer />
+              <ToastContainer position="top-center" autoClose={2000} />
             </ThemeProvider>
           </AuthProvider>
         </NextAuthSessionProvider>

@@ -5,6 +5,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/app/components/ui/dialog";
+import {
+  currencyToNumber,
+  formatCurrency,
+} from "@/helpers/formatterCurrentValue";
 import PdfOrder from "@/report/pdfOrder";
 import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
@@ -15,6 +19,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
+import { ConfirmationDialog } from "../confirmation-modal";
 import {
   Form,
   FormControl,
@@ -62,17 +67,18 @@ interface RegisterClientModalProps {
   onClose: VoidFunction;
   order: IOrderService;
   isEditing?: boolean;
-  setLoading?: VoidFunction;
+  loadOrders: () => Promise<void>;
 }
 
 export function ServiceOrderModal({
   onClose,
   order,
   isEditing,
+  loadOrders,
 }: RegisterClientModalProps) {
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
-
+  const [openAlertDialog, setOpenAlertDialog] = useState(false);
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -101,12 +107,10 @@ export function ServiceOrderModal({
       tipoServico: order ? order.tipoServico : "",
     },
   });
-  console.log(order);
 
   useEffect(() => {
     loadCustomers();
   }, []);
-  console.log();
   const onSubmit = async () => {
     const formData = form.getValues();
 
@@ -118,8 +122,12 @@ export function ServiceOrderModal({
       defeito: formData.defeito,
       defeitoConstatado: formData.defeitoConstatado,
       solucao: formData.solucao,
-      valServico: formData.valServico !== "" ? formData.valServico : 0,
-      valMaterial: formData.valMaterial !== "" ? formData.valMaterial : 0,
+      valServico:
+        formData.valServico !== "" ? currencyToNumber(formData.valServico) : 0,
+      valMaterial:
+        formData.valMaterial !== ""
+          ? currencyToNumber(formData.valMaterial)
+          : 0,
       garantiaPeca: formData.garantiaPeca,
       garantiaServico: formData.garantiaServico,
       horaChegada: formData.horaChegada,
@@ -131,14 +139,15 @@ export function ServiceOrderModal({
       ...data,
     };
 
-    console.log(data);
     setLoading(true);
 
     if (isEditing) {
+      console.log(dataIsEditing);
       await api
         .put(`os/${order?.id}`, dataIsEditing)
-        .then((reponse) => {
+        .then(() => {
           onClose();
+          loadOrders();
           toast.success("Cadastro alterado com sucesso.");
         })
         .catch((error) => {
@@ -151,8 +160,9 @@ export function ServiceOrderModal({
     } else {
       await api
         .post("os", data)
-        .then((reponse) => {
+        .then(() => {
           onClose();
+          loadOrders();
           toast.success("Cadastro realizado com sucesso.");
         })
         .catch((error) => {
@@ -182,9 +192,27 @@ export function ServiceOrderModal({
     PdfOrder({ order });
   };
 
+  const handleExcluir = async () => {
+    if (!isEditing) return onClose();
+    setLoading(true);
+    await api
+      .delete(`/os/${order?.id}`)
+      .then(() => {
+        loadOrders();
+        setOpenAlertDialog(false);
+        onClose();
+        toast.success("Ordem de serviço excluido com sucesso.");
+      })
+      .catch((error) => {
+        console.error(error);
+        toast.error(error.response.data.message);
+      })
+      .finally(() => setLoading(false));
+  };
+
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] h-[80%] overflow-auto md:h-fit w-[95%] md:w-fit">
         <DialogHeader>
           <DialogTitle className="text-2xl font-semibold flex items-center justify-between">
             {order && !isEditing ? "Detalhes da" : "Cadastro da"} Ordem de
@@ -405,7 +433,13 @@ export function ServiceOrderModal({
                   <FormItem>
                     <FormLabel>Valor do serviço</FormLabel>
                     <FormControl>
-                      <Input placeholder="R$ 0,00" {...field} />
+                      <Input
+                        placeholder="R$ 0,00"
+                        value={field.value}
+                        onChange={(e) => {
+                          field.onChange(formatCurrency(e.target.value));
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -418,7 +452,13 @@ export function ServiceOrderModal({
                   <FormItem>
                     <FormLabel>Valor do material</FormLabel>
                     <FormControl>
-                      <Input placeholder="R$ 0,00" {...field} />
+                      <Input
+                        placeholder="R$ 0,00"
+                        value={field.value}
+                        onChange={(e) => {
+                          field.onChange(formatCurrency(e.target.value));
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -458,10 +498,10 @@ export function ServiceOrderModal({
             <div className="flex justify-end gap-4">
               <Button
                 type="button"
-                variant={`${order && !isEditing ? "default" : "outline"}`}
-                onClick={() => onClose()}
+                variant={`${order && !isEditing ? "default" : "destructive"}`}
+                onClick={isEditing ? () => setOpenAlertDialog(true) : onClose}
               >
-                {order && !isEditing ? "Fechar" : "Cancelar"}
+                {isEditing ? "Excluir" : "Fechar"}
               </Button>
               {(!order || isEditing) && (
                 <Button type="submit" disabled={loading}>
@@ -472,6 +512,15 @@ export function ServiceOrderModal({
           </form>
         </Form>
       </DialogContent>
+      <ConfirmationDialog
+        title="Excluir ordem de serviço?"
+        description={`Tem certeza de que deseja excluir a ordem de serviço 
+              ${order?.id}? `}
+        loading={loading}
+        openAlertDialog={openAlertDialog}
+        setOpenAlertDialog={setOpenAlertDialog}
+        handleExcluir={handleExcluir}
+      />
     </Dialog>
   );
 }

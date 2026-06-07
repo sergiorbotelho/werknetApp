@@ -15,6 +15,7 @@ import { Customer } from "@/types/customer";
 import { IOrderService } from "@/types/order";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Printer } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -79,6 +80,7 @@ export function ServiceOrderModal({
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
+  const route = useRouter();
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -142,7 +144,6 @@ export function ServiceOrderModal({
     setLoading(true);
 
     if (isEditing) {
-      console.log(dataIsEditing);
       await api
         .put(`os/${order?.id}`, dataIsEditing)
         .then(() => {
@@ -268,7 +269,7 @@ export function ServiceOrderModal({
                           </p>
                           <Button
                             type="button"
-                            // onClick={() => setShowRegisterModal(true)}
+                            onClick={() => route.push("/customers")}
                             className="w-full"
                           >
                             Cadastrar novo cliente

@@ -1,5 +1,13 @@
 import { Customer } from "@/types/customer";
-import { Loader2, Mail, MapPin, Phone, Users } from "lucide-react";
+import {
+  ChevronRight,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 
@@ -52,7 +60,7 @@ export const CardCustomer = ({
             </div>
 
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               className="shrink-0"
               onClick={(e) => handleEdit(c, e)}
@@ -80,6 +88,13 @@ export const CardCustomer = ({
               </div>
             )}
           </div>
+
+          <Link
+            href={`/customers/${c.id}`}
+            className="mt-4 flex items-center justify-between text-sm font-medium text-accent hover:underline"
+          >
+            Ver ordens de serviço <ChevronRight className="h-4 w-4" />
+          </Link>
         </Card>
       ))}
     </section>

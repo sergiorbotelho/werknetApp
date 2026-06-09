@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Header } from "../header";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
-import { CardCustomer } from "./custome-card";
+import { CardCustomer } from "./customer-card";
 import { CustomerModal } from "./customer-modal";
 
 export default function Customers() {

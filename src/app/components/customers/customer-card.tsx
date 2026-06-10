@@ -1,36 +1,24 @@
 import { Customer } from "@/types/customer";
-import {
-  ChevronRight,
-  Loader2,
-  Mail,
-  MapPin,
-  Phone,
-  Users,
-} from "lucide-react";
+import { ChevronRight, Mail, MapPin, Phone, Users } from "lucide-react";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
 
 interface CardCustomerProps {
-  loading: boolean;
   filtered: Customer[];
   handleEdit: (customer: Customer, event: React.MouseEvent) => void;
 }
 
-export const CardCustomer = ({
-  loading,
-  filtered,
-  handleEdit,
-}: CardCustomerProps) => {
+export const CardCustomer = ({ filtered, handleEdit }: CardCustomerProps) => {
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-      {loading && (
+      {/* {loading && (
         <div className="col-span-full text-center py-12">
           <Loader2 className="h-6 w-6 animate-spin mx-auto text-muted-foreground" />
         </div>
-      )}
+      )} */}
 
-      {!loading && filtered.length === 0 && (
+      {filtered.length === 0 && (
         <Card className="col-span-full p-12 text-center -mt-4">
           <Users className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
           <p className="text-muted-foreground">Nenhum cliente cadastrado.</p>

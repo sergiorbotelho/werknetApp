@@ -12,6 +12,7 @@ import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SquareX } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
@@ -44,15 +45,15 @@ interface RegisterClientModalProps {
   onClose: VoidFunction;
   customer: Customer;
   isEditing?: boolean;
-  loadCustomers: () => Promise<void>;
+  // loadCustomers: () => Promise<void>;
 }
 
 export function CustomerModal({
   onClose,
   customer,
   isEditing,
-  loadCustomers,
 }: RegisterClientModalProps) {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
   const {
@@ -116,7 +117,7 @@ export function CustomerModal({
       await api
         .put(`/customer/${customer?.id}`, formattedData)
         .then(() => {
-          loadCustomers();
+          router.refresh();
           reset();
           onClose();
           toast.success("Cadastro alterado com sucesso.");
@@ -132,7 +133,7 @@ export function CustomerModal({
       await api
         .post("/customer", formattedData)
         .then(() => {
-          loadCustomers();
+          router.refresh();
           reset();
           onClose();
           toast.success("Cadastro realizado com sucesso.");
@@ -153,7 +154,7 @@ export function CustomerModal({
     await api
       .delete(`/customer/${customer?.id}`)
       .then(() => {
-        loadCustomers();
+        router.refresh();
         setOpenAlertDialog(false);
         reset();
         onClose();

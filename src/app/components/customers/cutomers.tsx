@@ -1,23 +1,22 @@
 "use client";
-import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
 import { Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Header } from "../header";
 import { Card } from "../ui/card";
 import { Input } from "../ui/input";
 import { CardCustomer } from "./customer-card";
 import { CustomerModal } from "./customer-modal";
 
-export default function Customers() {
+interface CustomersProps {
+  customers: Customer[];
+}
+
+export default function Customers({ customers }: CustomersProps) {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [loading, setLoading] = useState(false);
+
   const [isEditing, setIsEditing] = useState(false);
-  useEffect(() => {
-    loadCustomers();
-  }, []);
 
   const handleCloseModal = () => {
     setIsEditing(false);
@@ -25,24 +24,12 @@ export default function Customers() {
     setIsModalOpen(false);
   };
 
-  const loadCustomers = async () => {
-    setLoading(true);
-    await api
-      .get("/customers")
-      .then((response) => {
-        setCustomers(response.data.customers);
-      })
-      .catch((error) => {
-        console.error(error);
-      })
-      .finally(() => setLoading(false));
-  };
   const [q, setQ] = useState("");
 
   const filtered = useMemo(() => {
     if (!q.trim()) return customers;
     const t = q.toLowerCase();
-    return customers.filter(
+    return customers?.filter(
       (c) =>
         c.nome.toLowerCase().includes(t) ||
         c.id?.toString().toLowerCase().includes(t),
@@ -75,15 +62,10 @@ export default function Customers() {
           />
         </div>
       </Card>
-      <CardCustomer
-        loading={loading}
-        filtered={filtered}
-        handleEdit={handleEdit}
-      />
+      <CardCustomer filtered={filtered} handleEdit={handleEdit} />
       {(isModalOpen || selectedCustomer !== null) && (
         <CustomerModal
           customer={selectedCustomer}
-          loadCustomers={loadCustomers}
           onClose={handleCloseModal}
           isEditing={isEditing}
         />

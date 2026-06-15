@@ -14,7 +14,7 @@ import { ServiceOrderModal } from "./serviceorder-modal";
 
 export default function ServiceOrders() {
   const [serviceOrders, setServiceOrders] = useState<IOrderService[] | null>(
-    [],
+    null,
   );
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -31,10 +31,12 @@ export default function ServiceOrders() {
       .get("/os")
       .then((response) => {
         setServiceOrders(response.data.os.toReversed());
-        setLoading(false);
       })
       .catch((error) => {
         console.error(error);
+      })
+      .finally(() => {
+        // setInitialState(false);
         setLoading(false);
       });
   };

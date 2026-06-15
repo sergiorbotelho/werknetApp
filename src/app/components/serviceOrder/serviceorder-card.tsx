@@ -22,7 +22,7 @@ export const CardServiceOrder = ({
     <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
       {loading && (
         <>
-          {Array.from({ length: 4 }).map((_, idx) => (
+          {Array.from({ length: 6 }).map((_, idx) => (
             <div key={idx}>
               <CardSkeleton />
             </div>

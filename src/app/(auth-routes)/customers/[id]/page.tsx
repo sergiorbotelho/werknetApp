@@ -15,7 +15,7 @@ import { toast } from "react-toastify";
 
 export default function PageCustomer() {
   const [serviceOrders, setServiceOrders] = useState<IOrderService[] | null>(
-    [],
+    null,
   );
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(false);
@@ -101,7 +101,7 @@ export default function PageCustomer() {
             <h1 className="text-3xl font-bold">{customer?.nome}</h1>
             <div className="flex flex-wrap gap-4 mt-3 text-sm opacity-90">
               {customer?.telefone && (
-                <span className="flex items-center gap-1.5">
+                <span className="flex gap-1.5">
                   <Phone className="h-4 w-4" />
                   {customer?.telefone}
                 </span>
@@ -137,7 +137,7 @@ export default function PageCustomer() {
       </Card>
       <div>
         <h2 className="text-xl font-semibold mb-4">
-          Ordens de Serviço ({serviceOrders.length})
+          Ordens de Serviço ({serviceOrders?.length ?? 0})
         </h2>
         <div className="space-y-3">
           <CardServiceOrder

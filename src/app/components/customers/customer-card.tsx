@@ -68,13 +68,11 @@ export const CardCustomer = ({ filtered, handleEdit }: CardCustomerProps) => {
               <span className="truncate">{c.email}</span>
             </div>
 
-            {c.endereco && (
-              <div className="flex items-start gap-2 min-w-0">
-                <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            <div className="flex items-start gap-2 min-w-0">
+              <MapPin className="h-3.5 w-3.5 shrink-0 mt-0.5" />
 
-                <span className="break-words">{c.endereco}</span>
-              </div>
-            )}
+              <span className="break-words">{c.endereco}</span>
+            </div>
           </div>
 
           <Link

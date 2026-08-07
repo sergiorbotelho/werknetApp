@@ -50,15 +50,15 @@ export default function PdfOrder({ order }: PdfProps) {
                     style: { fontSize: 10 },
                   },
                   {
-                    text: "Rua Irene Ramos Gomes de Mattos 97 Compl. CXPST 1927 Pina Recife - PE CEP: 51.011-530",
+                    text: "Rua Irene Ramos Gomes de Mattos 97 Compl. CXPST 1927",
                     style: { fontSize: 10 },
                   },
                   {
-                    text: "Fone: (81) 9972-6829.",
+                    text: "Pina Recife - PE CEP: 51.011-530",
                     style: { fontSize: 10 },
                   },
                   {
-                    text: "www.werknet.com.br",
+                    text: "Fone: (81) 9972-6829. www.werknet.com.br",
                     style: { fontSize: 10 },
                   },
                 ],
@@ -84,14 +84,14 @@ export default function PdfOrder({ order }: PdfProps) {
                 ],
               ],
             },
-            margin: [0, 10, 20, 0],
+            margin: [0, 10, 10, 0],
           },
         ],
       },
       content: {
         stack: [
           {
-            margin: [0, 0, 0, 3],
+            margin: [0, 0, 10, 3],
             columns: [
               {
                 text: `DATA: ${dayjs(order.created_at).format("DD/MM/YYYY")}`,
@@ -111,7 +111,7 @@ export default function PdfOrder({ order }: PdfProps) {
             layout: "noBorders",
             margin: [0, 0, 0, 2],
             table: {
-              widths: ["*", "*"],
+              widths: ["80%", "20%"],
 
               body: [
                 [
@@ -188,11 +188,11 @@ export default function PdfOrder({ order }: PdfProps) {
               body: [
                 [
                   {
-                    text: `CPF: ${order.client.cpf}`,
+                    text: `CPF: ${order.client.cpf ?? "***.***.***-**"}`,
                     alignment: "left",
                   },
                   {
-                    text: `CNPJ: ${order.client.cnpj ?? ""}`,
+                    text: `CNPJ: ${order.client.cnpj ?? "***.***.***/****-**"}`,
                     alignment: "left",
                     fontSize: 12,
                   },

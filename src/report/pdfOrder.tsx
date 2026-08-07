@@ -54,7 +54,7 @@ export default function PdfOrder({ order }: PdfProps) {
                     style: { fontSize: 10 },
                   },
                   {
-                    text: "Pina Recife - PE CEP: 51.011-530",
+                    text: "Pina - Recife - PE CEP: 51.011-530",
                     style: { fontSize: 10 },
                   },
                   {
@@ -91,7 +91,7 @@ export default function PdfOrder({ order }: PdfProps) {
       content: {
         stack: [
           {
-            margin: [0, 0, 10, 3],
+            margin: [0, 0, 0, 10],
             columns: [
               {
                 text: `DATA: ${dayjs(order.created_at).format("DD/MM/YYYY")}`,
@@ -247,7 +247,7 @@ export default function PdfOrder({ order }: PdfProps) {
           },
           {
             layout: "noBorders",
-            margin: [0, 0, 0, 2],
+            margin: [0, 0, 0, 10],
             table: {
               widths: ["*"],
               body: [

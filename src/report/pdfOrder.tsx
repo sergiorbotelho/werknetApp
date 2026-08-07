@@ -91,7 +91,7 @@ export default function PdfOrder({ order }: PdfProps) {
       content: {
         stack: [
           {
-            margin: [0, 0, 0, 10],
+            margin: [0, 0, 0, 2],
             columns: [
               {
                 text: `DATA: ${dayjs(order.created_at).format("DD/MM/YYYY")}`,
@@ -247,7 +247,7 @@ export default function PdfOrder({ order }: PdfProps) {
           },
           {
             layout: "noBorders",
-            margin: [0, 0, 0, 10],
+            margin: [0, 0, 0, 2],
             table: {
               widths: ["*"],
               body: [

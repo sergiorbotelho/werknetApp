@@ -42,7 +42,7 @@ export default function PdfOrder({ order }: PdfProps) {
               {
                 stack: [
                   {
-                    text: "Manutenção Preventiva, Corretiva em equipamento de informática.",
+                    text: "MANUTENÇÃO PREVENTIVA, CORRETIVA EM EQUIPAMENTO DE INFORMÁTICA.",
                     style: { fontSize: 10 },
                   },
                   {
@@ -50,15 +50,15 @@ export default function PdfOrder({ order }: PdfProps) {
                     style: { fontSize: 10 },
                   },
                   {
-                    text: "Rua Tupiniquins 447 Santo Amaro CEP: 50100-240",
+                    text: "Rua Irene Ramos Gomes de Mattos 97 Compl. CXPST 1927 Pina Recife - PE CEP: 51.011-530",
                     style: { fontSize: 10 },
                   },
                   {
-                    text: "Fone: (81) - 9972-6829 Recife PE.",
+                    text: "Fone: (81) 9972-6829.",
                     style: { fontSize: 10 },
                   },
                   {
-                    text: "Nosso Site: www.werknet.com.br",
+                    text: "www.werknet.com.br",
                     style: { fontSize: 10 },
                   },
                 ],
@@ -104,26 +104,6 @@ export default function PdfOrder({ order }: PdfProps) {
                 style: { fontSize: 12 },
                 alignment: "right",
                 marginRight: 15,
-              },
-            ],
-          },
-          {
-            margin: [0, 0, 0, 3],
-            columns: [
-              {
-                text: `HORA DE CHEGADA: 08:20`,
-                style: { fontSize: 12 },
-                alignment: "left",
-                width: "*",
-              },
-              {
-                text: `HORA DE SAÍDA: 11:55`,
-                style: { fontSize: 12 },
-                alignment: "right",
-                marginRight: 30,
-              },
-              {
-                text: ``,
               },
             ],
           },

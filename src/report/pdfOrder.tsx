@@ -111,7 +111,7 @@ export default function PdfOrder({ order }: PdfProps) {
             layout: "noBorders",
             margin: [0, 0, 0, 2],
             table: {
-              widths: ["80%", "20%"],
+              widths: ["70%", "30%"],
 
               body: [
                 [

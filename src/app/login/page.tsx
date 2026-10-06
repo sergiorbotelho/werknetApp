@@ -15,6 +15,7 @@ import { z } from "zod";
 import logo from "../../../public/logo.jpeg";
 
 import { Input } from "@/app/components/ui/input";
+import { markTabSession } from "@/lib/tab-session";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2Icon } from "lucide-react";
 import { signIn } from "next-auth/react";
@@ -61,6 +62,7 @@ export default function Login() {
       );
       return;
     }
+    markTabSession();
     router.replace("/");
     setLoading(false);
   };

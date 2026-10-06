@@ -1,3 +1,4 @@
+import { TabGuard } from "@/app/components/tab-guard";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { authOptions } from "@/lib/authOptions";
 import { getServerSession } from "next-auth";
@@ -22,6 +23,7 @@ export default async function PrivateLayout({
         <SidebarNav />
         <div className="flex flex-col md:mt-0 mt-10 flex-1">{children}</div>
       </div>
+      <TabGuard />
     </ThemeProvider>
   );
 }

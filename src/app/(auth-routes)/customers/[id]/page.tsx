@@ -1,9 +1,9 @@
 "use client";
 import { CardServiceOrder } from "@/app/components/serviceOrder/serviceorder-card";
+import { OrderPdfModal } from "@/app/components/serviceOrder/order-pdf-modal";
 import { ServiceOrderModal } from "@/app/components/serviceOrder/serviceorder-modal";
 import { Card } from "@/app/components/ui/card";
 import { Input } from "@/app/components/ui/input";
-import PdfOrder from "@/report/pdfOrder";
 import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
 import { IOrderService } from "@/types/order";
@@ -23,6 +23,7 @@ export default function PageCustomer() {
   const [isEditing, setIsEditing] = useState(false);
   const [q, setQ] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [pdfOrder, setPdfOrder] = useState<IOrderService | null>(null);
 
   const { id } = useParams();
 
@@ -59,10 +60,9 @@ export default function PageCustomer() {
     setIsEditing(true);
   };
 
-  const handlePrintOrder = (e: React.MouseEvent, order: IOrderService) => {
+  const handleViewPdf = (e: React.MouseEvent, order: IOrderService) => {
     e.stopPropagation();
-
-    PdfOrder({ order });
+    setPdfOrder(order);
   };
   const handleCloseModal = () => {
     setSelectedOrder(null);
@@ -143,7 +143,7 @@ export default function PageCustomer() {
           <CardServiceOrder
             filtered={filtered}
             loading={loading}
-            handlePrintOrder={handlePrintOrder}
+            handleViewPdf={handleViewPdf}
             handleEdit={handleEdit}
           />
         </div>
@@ -155,6 +155,9 @@ export default function PageCustomer() {
           isEditing={isEditing}
           loadOrders={loadOrderByCustomer}
         />
+      )}
+      {pdfOrder && (
+        <OrderPdfModal order={pdfOrder} onClose={() => setPdfOrder(null)} />
       )}
     </div>
   );

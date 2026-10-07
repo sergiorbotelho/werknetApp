@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { Input } from "@/app/components/ui/input";
-import PdfOrder from "@/report/pdfOrder";
 import { api } from "@/services/api/api";
 import { Search } from "lucide-react";
 import { IOrderService } from "../../../types/order";
 import { Header } from "../header";
 import { Card } from "../ui/card";
+import { OrderPdfModal } from "./order-pdf-modal";
 import { CardServiceOrder } from "./serviceorder-card";
 import { ServiceOrderModal } from "./serviceorder-modal";
 
@@ -21,6 +21,7 @@ export default function ServiceOrders() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [q, setQ] = useState("");
+  const [pdfOrder, setPdfOrder] = useState<IOrderService | null>(null);
 
   useEffect(() => {
     loadOrders();
@@ -66,10 +67,9 @@ export default function ServiceOrders() {
     setIsEditing(true);
   };
 
-  const handlePrintOrder = (e: React.MouseEvent, order: IOrderService) => {
+  const handleViewPdf = (e: React.MouseEvent, order: IOrderService) => {
     e.stopPropagation();
-
-    PdfOrder({ order });
+    setPdfOrder(order);
   };
 
   return (
@@ -97,7 +97,7 @@ export default function ServiceOrders() {
         loading={loading}
         filtered={filtered}
         handleEdit={handleEdit}
-        handlePrintOrder={handlePrintOrder}
+        handleViewPdf={handleViewPdf}
       />
       {(isModalOpen || selectedOrder !== null) && (
         <ServiceOrderModal
@@ -106,6 +106,9 @@ export default function ServiceOrders() {
           isEditing={isEditing}
           loadOrders={loadOrders}
         />
+      )}
+      {pdfOrder && (
+        <OrderPdfModal order={pdfOrder} onClose={() => setPdfOrder(null)} />
       )}
     </div>
   );

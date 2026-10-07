@@ -9,18 +9,18 @@ import {
   currencyToNumber,
   formatCurrency,
 } from "@/helpers/formatterCurrentValue";
-import PdfOrder from "@/report/pdfOrder";
 import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
 import { IOrderService } from "@/types/order";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Printer } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
 import { ConfirmationDialog } from "../confirmation-modal";
+import { OrderPdfModal } from "./order-pdf-modal";
 import {
   Form,
   FormControl,
@@ -80,6 +80,7 @@ export function ServiceOrderModal({
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
+  const [showPdf, setShowPdf] = useState(false);
   const route = useRouter();
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(schema),
@@ -187,10 +188,9 @@ export function ServiceOrderModal({
       });
   };
 
-  const handlePrint = (e: React.MouseEvent, order: IOrderService) => {
+  const handleViewPdf = (e: React.MouseEvent) => {
     e.stopPropagation();
-
-    PdfOrder({ order });
+    setShowPdf(true);
   };
 
   const handleExcluir = async () => {
@@ -220,11 +220,14 @@ export function ServiceOrderModal({
             serviço
             {order && !isEditing && (
               <Button
-                onClick={(e) => handlePrint(e, order)}
+                onClick={handleViewPdf}
                 variant="outline"
-                className="print-button"
+                size="sm"
+                className="print-button shrink-0 gap-1.5"
+                title="Visualizar PDF"
               >
-                <Printer />
+                <FileText className="h-4 w-4" />
+                Visualizar PDF
               </Button>
             )}
           </DialogTitle>
@@ -522,6 +525,9 @@ export function ServiceOrderModal({
         setOpenAlertDialog={setOpenAlertDialog}
         handleExcluir={handleExcluir}
       />
+      {showPdf && order && (
+        <OrderPdfModal order={order} onClose={() => setShowPdf(false)} />
+      )}
     </Dialog>
   );
 }

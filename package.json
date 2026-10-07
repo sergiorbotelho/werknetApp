@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "node -e \"require('fs').copyFileSync('node_modules/pdfjs-dist/build/pdf.worker.min.mjs','public/pdf.worker.min.mjs')\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -34,6 +35,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.53.0",
     "react-input-mask": "^2.0.4",
+    "react-pdf": "^10.5.0",
     "react-toastify": "^10.0.5",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",

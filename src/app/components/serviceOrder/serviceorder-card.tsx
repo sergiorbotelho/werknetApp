@@ -1,5 +1,5 @@
 import { IOrderService } from "@/types/order";
-import { Calendar, Printer, UserIcon, Wrench } from "lucide-react";
+import { Calendar, FileText, UserIcon, Wrench } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
@@ -9,14 +9,14 @@ interface CardServiceOrderProps {
   loading: boolean;
   filtered: IOrderService[];
   handleEdit: (order: IOrderService, event: React.MouseEvent) => void;
-  handlePrintOrder: (e: React.MouseEvent, order: IOrderService) => void;
+  handleViewPdf: (e: React.MouseEvent, order: IOrderService) => void;
 }
 
 export const CardServiceOrder = ({
   loading,
   filtered,
   handleEdit,
-  handlePrintOrder,
+  handleViewPdf,
 }: CardServiceOrderProps) => {
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -60,12 +60,14 @@ export const CardServiceOrder = ({
                 </div>
               </div>
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={(e) => handlePrintOrder(e, os)}
-                title="Imprimir OS"
+                variant="outline"
+                size="sm"
+                className="shrink-0 gap-1.5"
+                onClick={(e) => handleViewPdf(e, os)}
+                title="Visualizar PDF"
               >
-                <Printer className="h-4 w-4" />
+                <FileText className="h-4 w-4" />
+                PDF
               </Button>
             </div>
             <div className="mt-4 space-y-1.5 text-sm text-muted-foreground">

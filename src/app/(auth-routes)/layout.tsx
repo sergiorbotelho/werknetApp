@@ -16,6 +16,11 @@ export default async function PrivateLayout({
   if (!session) {
     redirect("/login");
   }
+
+  if (session.user.mustChangePassword) {
+    redirect("/alterar-senha");
+  }
+
   return (
     <ThemeProvider>
       {/* <SheetMenu /> */}

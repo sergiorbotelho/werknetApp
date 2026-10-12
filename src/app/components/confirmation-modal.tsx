@@ -11,6 +11,7 @@ import {
 interface ConfirmationDialogProps {
   title: string;
   description: string;
+  loadingText?: string;
   loading: boolean;
   openAlertDialog: boolean;
   setOpenAlertDialog: (value: boolean) => void;
@@ -18,6 +19,7 @@ interface ConfirmationDialogProps {
 }
 export function ConfirmationDialog({
   loading,
+  loadingText = "Excluindo...",
   openAlertDialog,
   setOpenAlertDialog,
   handleExcluir,
@@ -42,7 +44,7 @@ export function ConfirmationDialog({
             Não
           </AlertDialogCancel>
           <AlertDialogAction onClick={handleExcluir}>
-            {loading ? "Excluindo..." : "Sim"}
+            {loading ? loadingText : "Sim"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

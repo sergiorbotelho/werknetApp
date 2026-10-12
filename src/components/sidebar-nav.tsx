@@ -4,6 +4,7 @@ import { Button } from "@/app/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   CircleUser,
+  ShieldCheck,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -21,12 +22,17 @@ const nav = [
   { to: "/customers", label: "Clientes", icon: Users2Icon },
 ];
 const profileNav = { to: "/perfil", label: "Meu perfil", icon: CircleUser };
+const adminNav = [{ to: "/usuarios", label: "Usuários", icon: ShieldCheck }];
 export function SidebarNav({ className, ...props }: SidebarNavProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const path = usePathname();
   const route = useRouter();
   const { data: session } = useSession();
-  const items = [...nav, profileNav];
+  const items = [
+    ...nav,
+    ...(session?.user.role === "ADMIN" ? adminNav : []),
+    profileNav,
+  ];
   return (
     <div className="min-h-screen flex ">
       {/* Sidebar */}

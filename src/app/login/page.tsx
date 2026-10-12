@@ -52,12 +52,13 @@ export default function Login() {
 
     if (result?.error) {
       setLoading(false);
+      // `error` traz a mensagem da API lançada no authorize (authOptions)
       toast.error(
-        result.status === 401
-          ? "Usuário ou senha inválida"
-          : "Internal server error",
+        result.error === "CredentialsSignin"
+          ? "E-mail ou senha incorretos"
+          : result.error,
         {
-          autoClose: 2000,
+          autoClose: 4000,
         },
       );
       return;

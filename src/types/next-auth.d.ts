@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import { UserRole } from "./user";
 
 declare module "next-auth" {
   interface Session {
@@ -7,6 +8,8 @@ declare module "next-auth" {
       token: string;
       name?: string;
       email?: string;
+      role: UserRole;
+      mustChangePassword: boolean;
     };
   }
 }

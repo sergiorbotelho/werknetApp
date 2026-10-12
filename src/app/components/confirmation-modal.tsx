@@ -33,7 +33,9 @@ export function ConfirmationDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription className="flex flex-col gap-2">
             {description}
-            <p className="text-gray-400">* Esta ação não pode ser desfeita.</p>
+            <span className="text-gray-400">
+              * Esta ação não pode ser desfeita.
+            </span>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

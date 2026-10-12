@@ -2,8 +2,15 @@
 
 import { Button } from "@/app/components/ui/button";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, LogOut, Menu, Users2Icon, X } from "lucide-react";
-import { signOut } from "next-auth/react";
+import {
+  CircleUser,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Users2Icon,
+  X,
+} from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -13,10 +20,13 @@ const nav = [
   { to: "/", label: "Ordens de Serviço", icon: LayoutDashboard },
   { to: "/customers", label: "Clientes", icon: Users2Icon },
 ];
+const profileNav = { to: "/perfil", label: "Meu perfil", icon: CircleUser };
 export function SidebarNav({ className, ...props }: SidebarNavProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const path = usePathname();
   const route = useRouter();
+  const { data: session } = useSession();
+  const items = [...nav, profileNav];
   return (
     <div className="min-h-screen flex ">
       {/* Sidebar */}
@@ -35,7 +45,7 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
           </div>
         </div>
         <nav className="flex-1 p-4 space-y-1">
-          {nav.map((item, idx) => {
+          {items.map((item, idx) => {
             const active =
               item.to === "/"
                 ? path === "/"

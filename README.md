@@ -27,7 +27,7 @@ Este repositório contém apenas o **frontend**. Os dados vêm de uma API REST e
 | UI           | Tailwind CSS 3 · shadcn/ui (Radix UI) · lucide-react     |
 | Formulários  | React Hook Form · Zod                                    |
 | HTTP         | Axios                                                    |
-| PDF          | pdfmake (geração) · react-pdf / pdf.js (visualização)    |
+| PDF          | Gerado pela API · react-pdf / pdf.js (visualização)      |
 
 ## Pré-requisitos
 
@@ -86,7 +86,6 @@ src/
 │       ├── ui/               # Componentes shadcn/ui
 │       └── tab-guard.tsx     # Aba única + logout ao fechar
 ├── lib/                      # Configuração do NextAuth e sessão por aba
-├── report/pdfOrder.tsx       # Montagem do PDF da OS (pdfmake)
 ├── services/api/             # Clientes Axios (navegador e servidor)
 └── types/                    # Tipos de domínio
 ```
@@ -101,9 +100,8 @@ src/
   - Componentes de cliente usam `services/api/api.ts`, que injeta o token e faz logout automático em caso de `401`.
   - Componentes de servidor usam `getServerApi()`.
 - **PDF:**
-  - O documento é montado no navegador com pdfmake e desenhado em canvas pelo pdf.js. Iframes não são usados, porque o Safari do iOS e o Chrome do Android não exibem PDF dentro deles.
-  - O pdfmake só é carregado quando o modal abre.
-  - Há uma migração planejada para gerar o PDF no backend. Nesse caso, o modal apenas exibirá o arquivo recebido.
+  - A API gera o documento (`GET /os/:id/pdf`) e o modal o desenha em canvas com o pdf.js. Iframes não são usados para exibir o PDF, porque o Safari do iOS e o Chrome do Android não mostram PDF dentro deles.
+  - No desktop, **Imprimir** usa um iframe oculto só para chamar a impressão. No celular, abre o leitor nativo numa aba.
 
 Detalhes e decisões técnicas estão documentados em [`CLAUDE.md`](CLAUDE.md).
 

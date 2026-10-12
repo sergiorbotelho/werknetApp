@@ -6,10 +6,10 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/app/components/ui/dialog";
+import { api } from "@/services/api/api";
 import { IOrderService } from "@/types/order";
 import { Download, Printer, Share2, X } from "lucide-react";
 import dynamic from "next/dynamic";
-import { TCreatedPdf } from "pdfmake/build/pdfmake";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import { PdfStatus } from "./pdf-status";
@@ -20,14 +20,12 @@ const PdfViewer = dynamic(() => import("./pdf-viewer"), {
   loading: () => <PdfStatus />,
 });
 
-
 interface OrderPdfModalProps {
   order: IOrderService;
   onClose: () => void;
 }
 
 export function OrderPdfModal({ order, onClose }: OrderPdfModalProps) {
-  const [pdf, setPdf] = useState<TCreatedPdf | null>(null);
   const [blob, setBlob] = useState<Blob | null>(null);
   const [failed, setFailed] = useState(false);
 
@@ -36,21 +34,12 @@ export function OrderPdfModal({ order, onClose }: OrderPdfModalProps) {
   useEffect(() => {
     let cancelled = false;
 
-    // pdfmake + fontes (~1 MB) só são baixados quando o modal abre
-    import("@/report/pdfOrder")
-      .then(({ createOrderPdf }) => createOrderPdf(order))
-      .then(
-        (created) =>
-          new Promise<void>((resolve) => {
-            created.getBlob((result) => {
-              if (!cancelled) {
-                setPdf(created);
-                setBlob(result);
-              }
-              resolve();
-            });
-          }),
-      )
+    // O PDF é gerado pela API a cada pedido, sempre com os dados atuais da OS
+    api
+      .get<Blob>(`/os/${order.id}/pdf`, { responseType: "blob" })
+      .then((response) => {
+        if (!cancelled) setBlob(response.data);
+      })
       .catch((error) => {
         console.error("Erro ao gerar PDF:", error);
         if (!cancelled) setFailed(true);
@@ -59,7 +48,7 @@ export function OrderPdfModal({ order, onClose }: OrderPdfModalProps) {
     return () => {
       cancelled = true;
     };
-  }, [order]);
+  }, [order.id]);
 
   const file = useMemo(
     () =>
@@ -102,20 +91,49 @@ export function OrderPdfModal({ order, onClose }: OrderPdfModalProps) {
     }
   };
 
-  const handlePrint = () => {
-    if (!pdf) return;
-    // A aba precisa ser aberta ainda dentro do clique, senão o Safari (iOS) bloqueia
-    const win = window.open("", "_blank");
+  // Abre o PDF numa aba; precisa rodar dentro do clique, senão o Safari (iOS) bloqueia
+  const openInNewTab = (url: string) => {
+    const win = window.open(url, "_blank");
     if (!win) {
       toast.error("O navegador bloqueou a abertura do PDF.");
+      URL.revokeObjectURL(url);
       return;
     }
-    win.document.title = `OS ${order.id}`;
-    win.document.body.innerText = "Gerando PDF...";
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  };
 
-    // No PC abre já com a janela de impressão; no celular abre o leitor nativo
-    if (isMobile) pdf.open({}, win);
-    else pdf.print({}, win);
+  const handlePrint = () => {
+    if (!blob) return;
+    const url = URL.createObjectURL(blob);
+
+    // No celular abre o leitor nativo, que tem a opção de imprimir
+    if (isMobile) {
+      openInNewTab(url);
+      return;
+    }
+
+    // No PC imprime direto por um iframe oculto; o iframe só imprime, não exibe
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.src = url;
+    iframe.onload = () => {
+      try {
+        iframe.contentWindow?.focus();
+        iframe.contentWindow?.print();
+      } catch (error) {
+        // Fora do clique o navegador pode bloquear a aba; nesse caso o toast avisa
+        console.error(error);
+        openInNewTab(URL.createObjectURL(blob));
+      }
+      setTimeout(() => {
+        iframe.remove();
+        URL.revokeObjectURL(url);
+      }, 60_000);
+    };
+    document.body.appendChild(iframe);
   };
 
   return (
@@ -140,7 +158,7 @@ export function OrderPdfModal({ order, onClose }: OrderPdfModalProps) {
           )}
         </div>
 
-        {pdf && blob && (
+        {blob && (
           <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2 rounded-full border bg-card p-2 shadow-lg">
             {isMobile && canShare ? (
               <Button className="rounded-full" onClick={handleShare}>

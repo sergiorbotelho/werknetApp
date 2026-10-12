@@ -11,10 +11,14 @@ export function ClearPasswordFlag() {
   const router = useRouter();
 
   useEffect(() => {
-    update({ mustChangePassword: false }).then(() => {
-      router.replace("/");
-      router.refresh();
-    });
+    update({ mustChangePassword: false })
+      .then(() => {
+        router.replace("/");
+        router.refresh();
+      })
+      .catch(() => {
+        router.replace("/");
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -35,7 +35,7 @@ Required env vars (see `.env.example`): `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `NEXT
 - The "Excluir" buttons in the customer and OS modals only render for `role === "ADMIN"`.
 
 **Two axios clients, depending on where code runs:**
-- `src/services/api/api.ts` (`api`) is for client components. A request interceptor pulls the token from `getSession()` and caches it in a module variable. A 401 response clears the token and calls `signOut({ callbackUrl: "/login" })`. `authOptions.authorize` also uses this client for the login call.
+- `src/services/api/api.ts` (`api`) is for client components. A request interceptor pulls the token from `getSession()` and caches it in a module variable. A 401 response clears the token and calls `signOut({ callbackUrl: "/login" })`.
 - `src/services/api/serverApi.ts` (`getServerApi()`) is for server components. It builds a fresh axios instance with the token from `getServerSession(authOptions)`.
 
 **Data-fetching patterns differ by page:**

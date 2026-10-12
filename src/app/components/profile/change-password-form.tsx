@@ -6,8 +6,8 @@ import { Label } from "@/app/components/ui/label";
 import { cn } from "@/lib/utils";
 import { api } from "@/services/api/api";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, X } from "lucide-react";
-import { useState } from "react";
+import { Check, Eye, EyeOff, X } from "lucide-react";
+import { forwardRef, InputHTMLAttributes, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
@@ -15,14 +15,14 @@ import { z } from "zod";
 // Mesma regra da API (passwordSchema em apiwerk/src/schemas/user.ts)
 const passwordRules = [
   {
-    label: "Mínimo de 8 caracteres",
+    label: "8 ou mais caracteres",
     test: (value: string) => value.length >= 8,
   },
   {
-    label: "Pelo menos uma letra",
+    label: "Uma letra",
     test: (value: string) => /[A-Za-z]/.test(value),
   },
-  { label: "Pelo menos um número", test: (value: string) => /\d/.test(value) },
+  { label: "Um número", test: (value: string) => /\d/.test(value) },
 ];
 
 const schema = z
@@ -46,6 +46,43 @@ const schema = z
   });
 
 type FormData = z.infer<typeof schema>;
+
+interface PasswordInputProps extends InputHTMLAttributes<HTMLInputElement> {
+  invalid?: boolean;
+}
+
+// Campo de senha com botão para mostrar o que foi digitado (ajuda no celular)
+const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
+  ({ invalid, className, ...props }, ref) => {
+    const [visible, setVisible] = useState(false);
+
+    return (
+      <div className="relative">
+        <Input
+          ref={ref}
+          type={visible ? "text" : "password"}
+          aria-invalid={invalid}
+          className={cn(
+            "h-12 pr-12",
+            invalid && "border-red-500 focus-visible:ring-red-500",
+            className,
+          )}
+          {...props}
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((value) => !value)}
+          aria-label={visible ? "Ocultar senha" : "Mostrar senha"}
+          aria-pressed={visible}
+          className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-md text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
+    );
+  },
+);
+PasswordInput.displayName = "PasswordInput";
 
 interface ChangePasswordFormProps {
   currentPasswordLabel?: string;
@@ -86,15 +123,14 @@ export function ChangePasswordForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid gap-1">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <div className="grid gap-2">
         <Label htmlFor="currentPassword">{currentPasswordLabel}</Label>
-        <Input
+        <PasswordInput
           id="currentPassword"
-          type="password"
           autoComplete="current-password"
+          invalid={!!errors.currentPassword}
           {...register("currentPassword")}
-          className={errors.currentPassword ? "border-red-500" : ""}
         />
         {errors.currentPassword && (
           <p className="text-xs text-red-500">
@@ -103,46 +139,52 @@ export function ChangePasswordForm({
         )}
       </div>
 
-      <div className="grid gap-1">
+      <div className="grid gap-2">
         <Label htmlFor="newPassword">Nova senha</Label>
-        <Input
+        <PasswordInput
           id="newPassword"
-          type="password"
           autoComplete="new-password"
+          invalid={!!errors.newPassword}
           {...register("newPassword")}
-          className={errors.newPassword ? "border-red-500" : ""}
         />
+        <ul className="flex flex-wrap gap-2" aria-label="Requisitos da senha">
+          {passwordRules.map((rule) => {
+            const ok = rule.test(newPassword);
+            return (
+              <li
+                key={rule.label}
+                className={cn(
+                  "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                  ok
+                    ? "border-green-600 bg-green-50 text-green-700"
+                    : "border-border bg-background text-muted-foreground",
+                )}
+              >
+                {ok ? (
+                  <Check className="h-3.5 w-3.5" aria-hidden />
+                ) : (
+                  <X className="h-3.5 w-3.5" aria-hidden />
+                )}
+                {rule.label}
+                <span className="sr-only">
+                  {ok ? " (atendido)" : " (pendente)"}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
         {errors.newPassword && (
           <p className="text-xs text-red-500">{errors.newPassword.message}</p>
         )}
       </div>
 
-      <ul className="space-y-1 text-sm">
-        {passwordRules.map((rule) => {
-          const ok = rule.test(newPassword);
-          return (
-            <li
-              key={rule.label}
-              className={cn(
-                "flex items-center gap-2",
-                ok ? "text-green-600" : "text-muted-foreground",
-              )}
-            >
-              {ok ? <Check className="h-4 w-4" /> : <X className="h-4 w-4" />}
-              {rule.label}
-            </li>
-          );
-        })}
-      </ul>
-
-      <div className="grid gap-1">
+      <div className="grid gap-2">
         <Label htmlFor="confirmPassword">Confirme a nova senha</Label>
-        <Input
+        <PasswordInput
           id="confirmPassword"
-          type="password"
           autoComplete="new-password"
+          invalid={!!errors.confirmPassword}
           {...register("confirmPassword")}
-          className={errors.confirmPassword ? "border-red-500" : ""}
         />
         {errors.confirmPassword && (
           <p className="text-xs text-red-500">
@@ -151,7 +193,7 @@ export function ChangePasswordForm({
         )}
       </div>
 
-      <Button type="submit" className="w-full" disabled={loading}>
+      <Button type="submit" className="h-12 w-full" disabled={loading}>
         {loading ? "Salvando..." : "Salvar nova senha"}
       </Button>
     </form>

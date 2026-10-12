@@ -12,7 +12,7 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto w-full">
+    <div className="w-full">
       <Profile me={me} />
     </div>
   );

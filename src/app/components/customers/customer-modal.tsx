@@ -1,20 +1,21 @@
-import { Button } from "@/app/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/app/components/ui/dialog";
+  fieldClassName,
+  FormModal,
+  FormModalActions,
+  FormSection,
+} from "@/app/components/form-modal";
+import { Button } from "@/app/components/ui/button";
+import { Dialog } from "@/app/components/ui/dialog";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
+import { cn } from "@/lib/utils";
 import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SquareX } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
 import { toast } from "react-toastify";
@@ -46,8 +47,49 @@ interface RegisterClientModalProps {
   onClose: VoidFunction;
   customer: Customer;
   isEditing?: boolean;
-  // loadCustomers: () => Promise<void>;
 }
+
+interface FieldProps {
+  label: string;
+  htmlFor: string;
+  required?: boolean;
+  error?: string;
+  hint?: string;
+  className?: string;
+  children: ReactNode;
+}
+
+function Field({
+  label,
+  htmlFor,
+  required,
+  error,
+  hint,
+  className,
+  children,
+}: FieldProps) {
+  return (
+    <div className={cn("grid content-start gap-1.5", className)}>
+      <Label htmlFor={htmlFor}>
+        {label}
+        {required && (
+          <span className="text-red-500" aria-hidden>
+            {" "}
+            *
+          </span>
+        )}
+      </Label>
+      {children}
+      {error ? (
+        <p className="text-xs text-red-500">{error}</p>
+      ) : (
+        hint && <p className="text-xs text-muted-foreground">{hint}</p>
+      )}
+    </div>
+  );
+}
+
+const inputHeight = "h-11";
 
 export function CustomerModal({
   onClose,
@@ -60,6 +102,8 @@ export function CustomerModal({
   const { data: session } = useSession();
   // Excluir é só para admin (a API também recusa com 403)
   const canDelete = isEditing && session?.user.role === "ADMIN";
+  // Cliente aberto sem edição: só leitura
+  const readOnly = !!customer && !isEditing;
   const {
     register,
     handleSubmit,
@@ -188,214 +232,270 @@ export function CustomerModal({
     }
   };
 
+  const cepField = register("cep");
+
+  const title = !customer
+    ? "Novo cliente"
+    : readOnly
+      ? "Detalhes do cliente"
+      : "Editar cliente";
+
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
-      <DialogContent className="sm:max-w-[500px] h-[80%] overflow-auto md:h-fit w-[95%] md:w-fit">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold">
-            {customer && !isEditing ? "Detalhes do" : "Cadastro de"} Cliente
-          </DialogTitle>
-          <DialogTrigger
-            asChild
-            className="absolute right-2 top-1 cursor-pointer"
+      <FormModal
+        title={title}
+        description={customer?.nome}
+        onClose={onClose}
+        footer={
+          <FormModalActions
+            danger={
+              canDelete && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-11 w-full text-red-600 hover:bg-red-50 hover:text-red-700 sm:w-auto"
+                  onClick={() => setOpenAlertDialog(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Excluir cliente
+                </Button>
+              )
+            }
           >
-            <SquareX size={30} />
-          </DialogTrigger>
-        </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid gap-4">
-            <div className="grid gap-1">
-              <Label htmlFor="name">
-                Nome<span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="name"
-                {...register("nome")}
-                className={errors.nome ? "border-red-500" : ""}
-                disabled={customer && !isEditing ? true : false}
-              />
-              {errors.nome && (
-                <p className="text-xs text-red-500">{errors.nome.message}</p>
-              )}
-            </div>
-            <div className="grid gap-1">
-              <Label htmlFor="email">
-                Email<span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="email"
-                {...register("email")}
-                className={errors.email ? "border-red-500" : ""}
-                disabled={customer && !isEditing ? true : false}
-              />
-              {errors.email && (
-                <p className="text-xs text-red-500">{errors.email.message}</p>
-              )}
-            </div>
-
-            <div className="grid gap-1">
-              <Label htmlFor="telefone">
-                Telefone<span className="text-red-500">*</span>
-              </Label>
-              <InputMask
-                mask="(99) 99999-9999"
-                {...register("telefone")}
-                value={watch("telefone") || ""}
-                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                  errors.telefone ? "border-red-500" : ""
-                }`}
-              />
-              {errors.telefone && (
-                <p className="text-xs text-red-500">
-                  {errors.telefone.message}
-                </p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-1">
-                <Label htmlFor="cpf">
-                  CPF<span className="text-red-500">*</span>
-                </Label>
-                <InputMask
-                  mask="999.999.999-99"
-                  {...register("cpf")}
-                  className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                    errors.cpf ? "border-red-500" : ""
-                  }`}
-                />
-                {errors.cpf && (
-                  <p className="text-xs text-red-500">{errors.cpf.message}</p>
-                )}
-              </div>
-
-              <div className="grid gap-1">
-                <Label htmlFor="cnpj">
-                  CNPJ<span className="text-red-500">*</span>
-                </Label>
-                <InputMask
-                  mask="99.999.999/9999-99"
-                  {...register("cnpj")}
-                  className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                    errors.cnpj ? "border-red-500" : ""
-                  }`}
-                />
-                {errors.cnpj && (
-                  <p className="text-xs text-red-500">{errors.cnpj.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid gap-1">
-              <Label htmlFor="cep">CEP</Label>
-              <InputMask
-                disabled={customer && !isEditing ? true : false}
-                mask="99999-999"
-                {...register("cep")}
-                onChange={(e) =>
-                  handleCepChange(e.target.value.replace(/\D/g, ""))
-                }
-                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                  errors.cep ? "border-red-500" : ""
-                }`}
-              />
-              {errors.cep && (
-                <p className="text-xs text-red-500">{errors.cep.message}</p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <div className="col-span-2 grid gap-1">
-                <Label htmlFor="address">Endereço</Label>
-                <Input
-                  id="address"
-                  {...register("endereco")}
-                  className={errors.endereco ? "border-red-500" : ""}
-                />
-                {errors.endereco && (
-                  <p className="text-xs text-red-500">
-                    {errors.endereco.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid gap-1">
-                <Label htmlFor="number">Número</Label>
-                <Input
-                  id="number"
-                  {...register("numero")}
-                  className={errors.numero ? "border-red-500" : ""}
-                />
-                {errors.numero && (
-                  <p className="text-xs text-red-500">
-                    {errors.numero.message}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid gap-1">
-              <Label htmlFor="neighborhood">Bairro</Label>
-              <Input
-                id="neighborhood"
-                {...register("bairro")}
-                className={errors.bairro ? "border-red-500" : ""}
-              />
-              {errors.bairro && (
-                <p className="text-xs text-red-500">{errors.bairro.message}</p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-4 gap-2">
-              <div className="col-span-3 grid gap-1">
-                <Label htmlFor="city">Cidade</Label>
-                <Input
-                  id="city"
-                  {...register("cidade")}
-                  className={errors.cidade ? "border-red-500" : ""}
-                />
-                {errors.cidade && (
-                  <p className="text-xs text-red-500">
-                    {errors.cidade.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid gap-1">
-                <Label htmlFor="state">UF</Label>
-                <Input
-                  id="state"
-                  {...register("uf")}
-                  maxLength={2}
-                  className={`uppercase ${errors.uf ? "border-red-500" : ""}`}
-                />
-                {errors.uf && (
-                  <p className="text-xs text-red-500">{errors.uf.message}</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-4 pt-4">
             <Button
               type="button"
-              variant={canDelete || !customer ? "destructive" : "default"}
-              onClick={canDelete ? () => setOpenAlertDialog(true) : onClose}
+              variant="outline"
+              className="h-11"
+              onClick={onClose}
             >
-              {canDelete ? "Excluir" : "Fechar"}
+              {readOnly ? "Fechar" : "Cancelar"}
             </Button>
-            {(!customer || isEditing) && (
-              <Button type="submit" disabled={loading}>
-                {loading ? "Salvando..." : "Salvar"}
+            {!readOnly && (
+              <Button
+                type="submit"
+                form="customer-form"
+                className="h-11"
+                disabled={loading}
+              >
+                {loading
+                  ? "Salvando..."
+                  : customer
+                    ? "Salvar alterações"
+                    : "Cadastrar cliente"}
               </Button>
             )}
-          </div>
+          </FormModalActions>
+        }
+      >
+        <form
+          id="customer-form"
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-5"
+          noValidate
+        >
+          <FormSection title="Identificação">
+            <Field
+              label="Nome"
+              htmlFor="nome"
+              required
+              error={errors.nome?.message}
+              className="sm:col-span-6"
+            >
+              <Input
+                id="nome"
+                {...register("nome")}
+                autoComplete="off"
+                disabled={readOnly}
+                aria-invalid={!!errors.nome}
+                className={cn(inputHeight, errors.nome && "border-red-500")}
+              />
+            </Field>
+            <Field
+              label="CPF"
+              htmlFor="cpf"
+              error={errors.cpf?.message}
+              hint="Informe o CPF ou o CNPJ."
+              className="sm:col-span-3"
+            >
+              <InputMask
+                id="cpf"
+                mask="999.999.999-99"
+                inputMode="numeric"
+                {...register("cpf")}
+                disabled={readOnly}
+                aria-invalid={!!errors.cpf}
+                className={cn(
+                  fieldClassName,
+                  inputHeight,
+                  errors.cpf && "border-red-500",
+                )}
+              />
+            </Field>
+            <Field
+              label="CNPJ"
+              htmlFor="cnpj"
+              error={errors.cnpj?.message}
+              className="sm:col-span-3"
+            >
+              <InputMask
+                id="cnpj"
+                mask="99.999.999/9999-99"
+                inputMode="numeric"
+                {...register("cnpj")}
+                disabled={readOnly}
+                aria-invalid={!!errors.cnpj}
+                className={cn(
+                  fieldClassName,
+                  inputHeight,
+                  errors.cnpj && "border-red-500",
+                )}
+              />
+            </Field>
+          </FormSection>
+
+          <FormSection title="Contato">
+            <Field
+              label="Telefone"
+              htmlFor="telefone"
+              required
+              error={errors.telefone?.message}
+              className="sm:col-span-3"
+            >
+              <InputMask
+                id="telefone"
+                mask="(99) 99999-9999"
+                inputMode="tel"
+                {...register("telefone")}
+                value={watch("telefone") || ""}
+                disabled={readOnly}
+                aria-invalid={!!errors.telefone}
+                className={cn(
+                  fieldClassName,
+                  inputHeight,
+                  errors.telefone && "border-red-500",
+                )}
+              />
+            </Field>
+            <Field
+              label="E-mail"
+              htmlFor="email"
+              required
+              error={errors.email?.message}
+              className="sm:col-span-3"
+            >
+              <Input
+                id="email"
+                type="email"
+                inputMode="email"
+                {...register("email")}
+                disabled={readOnly}
+                aria-invalid={!!errors.email}
+                className={cn(inputHeight, errors.email && "border-red-500")}
+              />
+            </Field>
+          </FormSection>
+
+          <FormSection
+            title="Endereço"
+            description="Digite o CEP para preencher o endereço automaticamente."
+          >
+            <Field
+              label="CEP"
+              htmlFor="cep"
+              error={errors.cep?.message}
+              className="sm:col-span-2"
+            >
+              <InputMask
+                id="cep"
+                mask="99999-999"
+                inputMode="numeric"
+                {...cepField}
+                onChange={(e) => {
+                  cepField.onChange(e);
+                  handleCepChange(e.target.value.replace(/\D/g, ""));
+                }}
+                disabled={readOnly}
+                className={cn(
+                  fieldClassName,
+                  inputHeight,
+                  errors.cep && "border-red-500",
+                )}
+              />
+            </Field>
+            <Field
+              label="Endereço"
+              htmlFor="endereco"
+              error={errors.endereco?.message}
+              className="sm:col-span-4"
+            >
+              <Input
+                id="endereco"
+                {...register("endereco")}
+                disabled={readOnly}
+                className={inputHeight}
+              />
+            </Field>
+            <Field
+              label="Número"
+              htmlFor="numero"
+              error={errors.numero?.message}
+              className="sm:col-span-2"
+            >
+              <Input
+                id="numero"
+                {...register("numero")}
+                disabled={readOnly}
+                className={inputHeight}
+              />
+            </Field>
+            <Field
+              label="Bairro"
+              htmlFor="bairro"
+              error={errors.bairro?.message}
+              className="sm:col-span-4"
+            >
+              <Input
+                id="bairro"
+                {...register("bairro")}
+                disabled={readOnly}
+                className={inputHeight}
+              />
+            </Field>
+            <Field
+              label="Cidade"
+              htmlFor="cidade"
+              error={errors.cidade?.message}
+              className="sm:col-span-4"
+            >
+              <Input
+                id="cidade"
+                {...register("cidade")}
+                disabled={readOnly}
+                className={inputHeight}
+              />
+            </Field>
+            <Field
+              label="UF"
+              htmlFor="uf"
+              error={errors.uf?.message}
+              className="sm:col-span-2"
+            >
+              <Input
+                id="uf"
+                {...register("uf")}
+                maxLength={2}
+                disabled={readOnly}
+                className={cn(inputHeight, "uppercase")}
+              />
+            </Field>
+          </FormSection>
         </form>
-      </DialogContent>
+      </FormModal>
       <ConfirmationDialog
         title="Excluir cliente?"
-        description={`Tem certeza de que deseja excluir o cliente
-              ${customer?.nome.toUpperCase()}? `}
+        description={`Tem certeza de que deseja excluir o cliente ${
+          customer?.nome?.toUpperCase() ?? ""
+        }?`}
         loading={loading}
         openAlertDialog={openAlertDialog}
         setOpenAlertDialog={setOpenAlertDialog}

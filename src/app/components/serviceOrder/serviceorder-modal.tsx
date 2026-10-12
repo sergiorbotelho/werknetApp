@@ -1,19 +1,22 @@
-import { Button } from "@/app/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/app/components/ui/dialog";
+  fieldClassName,
+  FormModal,
+  FormModalActions,
+  FormSection,
+} from "@/app/components/form-modal";
+import { Button } from "@/app/components/ui/button";
+import { Dialog } from "@/app/components/ui/dialog";
+import { formatBRL } from "@/helpers/format";
 import {
   currencyToNumber,
   formatCurrency,
 } from "@/helpers/formatterCurrentValue";
+import { cn } from "@/lib/utils";
 import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
-import { IOrderService } from "@/types/order";
+import { IOrderService, serviceTypeLabels } from "@/types/order";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FileText } from "lucide-react";
+import { FileText, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -21,7 +24,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
 import { z } from "zod";
 import { ConfirmationDialog } from "../confirmation-modal";
-import { OrderPdfModal } from "./order-pdf-modal";
 import {
   Form,
   FormControl,
@@ -31,6 +33,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import {
   Select,
   SelectContent,
@@ -38,6 +41,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { OrderPdfModal } from "./order-pdf-modal";
 
 const schema = z.object({
   nome: z
@@ -72,6 +76,21 @@ interface RegisterClientModalProps {
   loadOrders: () => Promise<void>;
 }
 
+const inputHeight = "h-11";
+
+function RequiredMark() {
+  return (
+    <span className="text-red-500" aria-hidden>
+      {" "}
+      *
+    </span>
+  );
+}
+
+function moneyToNumber(value: string) {
+  return value ? currencyToNumber(value) || 0 : 0;
+}
+
 export function ServiceOrderModal({
   onClose,
   order,
@@ -84,12 +103,14 @@ export function ServiceOrderModal({
   const { data: session } = useSession();
   // Excluir é só para admin (a API também recusa com 403)
   const canDelete = isEditing && session?.user.role === "ADMIN";
+  // OS aberta sem edição: só leitura
+  const readOnly = !!order && !isEditing;
   const [showPdf, setShowPdf] = useState(false);
   const route = useRouter();
   const form = useForm<ServiceFormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      nome: order ? order.client.id.toString() : "",
+      nome: order?.client?.id ? order.client.id.toString() : "",
       horaChegada: order ? order.horaChegada : "",
       horaSaida: order ? order.horaSaida : "",
       modeloEquipamento: order ? order.modeloEquipamento : "",
@@ -114,6 +135,11 @@ export function ServiceOrderModal({
       tipoServico: order ? order.tipoServico : "",
     },
   });
+
+  // Total ao vivo: o mesmo cálculo que a API faz ao salvar
+  const total =
+    moneyToNumber(form.watch("valServico")) +
+    moneyToNumber(form.watch("valMaterial"));
 
   useEffect(() => {
     loadCustomers();
@@ -192,11 +218,6 @@ export function ServiceOrderModal({
       });
   };
 
-  const handleViewPdf = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowPdf(true);
-  };
-
   const handleExcluir = async () => {
     if (!isEditing) return onClose();
     setLoading(true);
@@ -215,108 +236,205 @@ export function ServiceOrderModal({
       .finally(() => setLoading(false));
   };
 
+  const title = order ? `OS #${order.id}` : "Nova ordem de serviço";
+  const description = order
+    ? order.client?.nome
+    : "Preencha os dados do atendimento.";
+
   return (
     <Dialog open={true} onOpenChange={() => onClose()}>
-      <DialogContent className="sm:max-w-[600px] h-[80%] overflow-auto md:h-fit w-[95%] md:w-fit">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold flex items-center justify-between">
-            {order && !isEditing ? "Detalhes da" : "Cadastro da"} Ordem de
-            serviço
-            {order && !isEditing && (
+      <FormModal
+        size="lg"
+        title={title}
+        description={description}
+        onClose={onClose}
+        headerAction={
+          order && (
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 shrink-0 gap-1.5"
+              onClick={() => setShowPdf(true)}
+            >
+              <FileText className="h-4 w-4" />
+              PDF
+            </Button>
+          )
+        }
+        footer={
+          <FormModalActions
+            danger={
+              canDelete && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="h-11 w-full text-red-600 hover:bg-red-50 hover:text-red-700 sm:w-auto"
+                  onClick={() => setOpenAlertDialog(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Excluir OS
+                </Button>
+              )
+            }
+          >
+            <Button
+              type="button"
+              variant="outline"
+              className="h-11"
+              onClick={onClose}
+            >
+              {readOnly ? "Fechar" : "Cancelar"}
+            </Button>
+            {!readOnly && (
               <Button
-                onClick={handleViewPdf}
-                variant="outline"
-                size="sm"
-                className="print-button shrink-0 gap-1.5"
-                title="Visualizar PDF"
+                type="submit"
+                form="os-form"
+                className="h-11"
+                disabled={loading}
               >
-                <FileText className="h-4 w-4" />
-                Visualizar PDF
+                {loading
+                  ? "Salvando..."
+                  : order
+                    ? "Salvar alterações"
+                    : "Cadastrar OS"}
               </Button>
             )}
-          </DialogTitle>
-        </DialogHeader>
+          </FormModalActions>
+        }
+      >
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="nome"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Cliente<span className="text-red-500">*</span>
-                  </FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                    disabled={!!order}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um cliente" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {loading ? (
-                        <SelectItem value="loading">Carregando...</SelectItem>
-                      ) : customers.length > 0 ? (
-                        customers.map((client) => (
-                          <SelectItem
-                            key={client.id}
-                            value={client.id.toString()}
-                          >
-                            {client.nome}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <div className="p-2">
-                          <p className="text-sm text-gray-500 mb-2">
-                            Nenhum cliente encontrado
-                          </p>
-                          <Button
-                            type="button"
-                            onClick={() => route.push("/customers")}
-                            className="w-full"
-                          >
-                            Cadastrar novo cliente
-                          </Button>
-                        </div>
+          <form id="os-form" onSubmit={form.handleSubmit(onSubmit)}>
+            <fieldset disabled={readOnly} className="min-w-0 space-y-5">
+              <FormSection title="Atendimento">
+                <FormField
+                  control={form.control}
+                  name="nome"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5 sm:col-span-6">
+                      <FormLabel>
+                        Cliente
+                        <RequiredMark />
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        value={field.value}
+                        disabled={!!order}
+                      >
+                        <FormControl>
+                          <SelectTrigger className={inputHeight}>
+                            <SelectValue placeholder="Selecione um cliente" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {customers.length > 0 ? (
+                            customers.map((client) => (
+                              <SelectItem
+                                key={client.id}
+                                value={client.id.toString()}
+                              >
+                                {client.nome}
+                              </SelectItem>
+                            ))
+                          ) : order?.client ? (
+                            // Enquanto a lista carrega, mantém o cliente da OS visível
+                            <SelectItem value={order.client.id.toString()}>
+                              {order.client.nome}
+                            </SelectItem>
+                          ) : (
+                            <div className="p-2">
+                              <p className="mb-2 text-sm text-muted-foreground">
+                                Nenhum cliente encontrado
+                              </p>
+                              <Button
+                                type="button"
+                                onClick={() => route.push("/customers")}
+                                className="w-full"
+                              >
+                                Cadastrar novo cliente
+                              </Button>
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+                      {order && (
+                        <p className="text-xs text-muted-foreground">
+                          O cliente não pode ser trocado depois do cadastro.
+                        </p>
                       )}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="contato"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Contato<span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Nome do contato" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-4">
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="contato"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5 sm:col-span-3">
+                      <FormLabel>
+                        Contato
+                        <RequiredMark />
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Quem atendeu no local"
+                          className={inputHeight}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tipoServico"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5 sm:col-span-3">
+                      <FormLabel>
+                        Tipo de serviço
+                        <RequiredMark />
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        defaultValue={field.value}
+                        disabled={readOnly}
+                      >
+                        <FormControl>
+                          <SelectTrigger className={inputHeight}>
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {Object.entries(serviceTypeLabels).map(
+                            ([value, label]) => (
+                              <SelectItem key={value} value={value}>
+                                {label}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="horaChegada"
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="space-y-1.5 sm:col-span-3">
                       <FormLabel>
-                        Hora chegada<span className="text-red-500">*</span>
+                        Hora de chegada
+                        <RequiredMark />
                       </FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input
+                          type="time"
+                          className={inputHeight}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -326,204 +444,206 @@ export function ServiceOrderModal({
                   control={form.control}
                   name="horaSaida"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Hora Saída</FormLabel>
+                    <FormItem className="space-y-1.5 sm:col-span-3">
+                      <FormLabel>Hora de saída</FormLabel>
                       <FormControl>
-                        <Input type="time" {...field} />
+                        <Input
+                          type="time"
+                          className={inputHeight}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-            </div>
+              </FormSection>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="modeloEquipamento"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Modelo equipamento<span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Modelo do equipamento" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="tipoServico"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Tipo do serviço<span className="text-red-500">*</span>
-                    </FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      defaultValue={field.value}
-                    >
+              <FormSection title="Equipamento">
+                <FormField
+                  control={form.control}
+                  name="modeloEquipamento"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5 sm:col-span-6">
+                      <FormLabel>
+                        Modelo do equipamento
+                        <RequiredMark />
+                      </FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
+                        <Input
+                          placeholder="Ex.: Impressora Epson L3250"
+                          className={inputHeight}
+                          {...field}
+                        />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="FORADEGARANTIA">
-                          FORA DE GARANTIA
-                        </SelectItem>
-                        <SelectItem value="GARANTIA">GARANTIA</SelectItem>
-                        <SelectItem value="ORCAMENTO">ORÇAMENTO</SelectItem>
-                        <SelectItem value="CONTRATO">CONTRATO</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="defeito"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5 sm:col-span-3">
+                      <FormLabel>
+                        Defeito relatado
+                        <RequiredMark />
+                      </FormLabel>
+                      <FormControl>
+                        <textarea
+                          rows={3}
+                          placeholder="O que o cliente informou"
+                          className={cn(fieldClassName, "min-h-24 resize-y")}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="defeitoConstatado"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5 sm:col-span-3">
+                      <FormLabel>Defeito constatado</FormLabel>
+                      <FormControl>
+                        <textarea
+                          rows={3}
+                          placeholder="O que o técnico encontrou"
+                          className={cn(fieldClassName, "min-h-24 resize-y")}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="solucao"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5 sm:col-span-6">
+                      <FormLabel>Solução</FormLabel>
+                      <FormControl>
+                        <textarea
+                          rows={3}
+                          placeholder="O que foi feito para resolver"
+                          className={cn(fieldClassName, "min-h-24 resize-y")}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </FormSection>
 
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+              <FormSection title="Valores">
+                <FormField
+                  control={form.control}
+                  name="valServico"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5 sm:col-span-2">
+                      <FormLabel>Serviço</FormLabel>
+                      <FormControl>
+                        <Input
+                          inputMode="numeric"
+                          placeholder="R$ 0,00"
+                          className={cn(inputHeight, "tabular-nums")}
+                          value={field.value}
+                          onChange={(e) => {
+                            field.onChange(formatCurrency(e.target.value));
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="valMaterial"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5 sm:col-span-2">
+                      <FormLabel>Material</FormLabel>
+                      <FormControl>
+                        <Input
+                          inputMode="numeric"
+                          placeholder="R$ 0,00"
+                          className={cn(inputHeight, "tabular-nums")}
+                          value={field.value}
+                          onChange={(e) => {
+                            field.onChange(formatCurrency(e.target.value));
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* Mesma estrutura dos campos ao lado (rótulo + caixa h-11),
+                    para alinhar sem margem fixa */}
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label id="total-label">Total</Label>
+                  <output
+                    aria-labelledby="total-label"
+                    aria-live="polite"
+                    className={cn(
+                      inputHeight,
+                      "flex items-center justify-end rounded-md bg-primary px-4 text-lg font-bold tabular-nums text-primary-foreground",
+                    )}
+                  >
+                    {formatBRL(total)}
+                  </output>
+                </div>
+              </FormSection>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="defeito"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Defeito<span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Descrição do defeito" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="defeitoConstatado"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Defeito constatado</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Defeito constatado" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="solucao"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Solução</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Descrição da solução" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="valServico"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Valor do serviço</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="R$ 0,00"
-                        value={field.value}
-                        onChange={(e) => {
-                          field.onChange(formatCurrency(e.target.value));
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="valMaterial"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Valor do material</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="R$ 0,00"
-                        value={field.value}
-                        onChange={(e) => {
-                          field.onChange(formatCurrency(e.target.value));
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="garantiaPeca"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Garantia da peça</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Período de garantia" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="garantiaServico"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Garantia do serviço</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Período de garantia" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="flex justify-end gap-4">
-              <Button
-                type="button"
-                variant={canDelete || !order ? "destructive" : "default"}
-                onClick={canDelete ? () => setOpenAlertDialog(true) : onClose}
-              >
-                {canDelete ? "Excluir" : "Fechar"}
-              </Button>
-              {(!order || isEditing) && (
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Salvando..." : "Salvar"}
-                </Button>
-              )}
-            </div>
+              <FormSection title="Garantia">
+                <FormField
+                  control={form.control}
+                  name="garantiaPeca"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5 sm:col-span-3">
+                      <FormLabel>Garantia da peça</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex.: 90 dias"
+                          className={inputHeight}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="garantiaServico"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5 sm:col-span-3">
+                      <FormLabel>Garantia do serviço</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ex.: 30 dias"
+                          className={inputHeight}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </FormSection>
+            </fieldset>
           </form>
         </Form>
-      </DialogContent>
+      </FormModal>
       <ConfirmationDialog
         title="Excluir ordem de serviço?"
-        description={`Tem certeza de que deseja excluir a ordem de serviço 
-              ${order?.id}? `}
+        description={`Tem certeza de que deseja excluir a ordem de serviço ${
+          order?.id ?? ""
+        }?`}
         loading={loading}
         openAlertDialog={openAlertDialog}
         setOpenAlertDialog={setOpenAlertDialog}

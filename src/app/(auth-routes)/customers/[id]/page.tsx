@@ -38,7 +38,10 @@ export default function PageCustomer() {
         setCustomer(response.data);
       })
       .catch((error) => {
-        toast.error(error);
+        console.error(error);
+        toast.error(
+          error.response?.data?.message ?? "Erro ao carregar o cliente.",
+        );
       });
   };
 
@@ -50,7 +53,11 @@ export default function PageCustomer() {
         setServiceOrders(response.data.os);
       })
       .catch((error) => {
-        toast.error(error);
+        console.error(error);
+        toast.error(
+          error.response?.data?.message ??
+            "Erro ao carregar as ordens de serviço.",
+        );
       })
       .finally(() => setLoading(false));
   };

@@ -13,6 +13,7 @@ import { Customer } from "@/types/customer";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SquareX } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
@@ -56,6 +57,9 @@ export function CustomerModal({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
+  const { data: session } = useSession();
+  // Excluir é só para admin (a API também recusa com 403)
+  const canDelete = isEditing && session?.user.role === "ADMIN";
   const {
     register,
     handleSubmit,
@@ -375,10 +379,10 @@ export function CustomerModal({
           <div className="flex justify-end space-x-4 pt-4">
             <Button
               type="button"
-              variant={`${customer && !isEditing ? "default" : "destructive"}`}
-              onClick={isEditing ? () => setOpenAlertDialog(true) : onClose}
+              variant={canDelete || !customer ? "destructive" : "default"}
+              onClick={canDelete ? () => setOpenAlertDialog(true) : onClose}
             >
-              {isEditing ? "Excluir" : "Fechar"}
+              {canDelete ? "Excluir" : "Fechar"}
             </Button>
             {(!customer || isEditing) && (
               <Button type="submit" disabled={loading}>

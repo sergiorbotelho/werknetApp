@@ -15,6 +15,7 @@ import { IOrderService } from "@/types/order";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
@@ -80,6 +81,9 @@ export function ServiceOrderModal({
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [openAlertDialog, setOpenAlertDialog] = useState(false);
+  const { data: session } = useSession();
+  // Excluir é só para admin (a API também recusa com 403)
+  const canDelete = isEditing && session?.user.role === "ADMIN";
   const [showPdf, setShowPdf] = useState(false);
   const route = useRouter();
   const form = useForm<ServiceFormValues>({
@@ -502,10 +506,10 @@ export function ServiceOrderModal({
             <div className="flex justify-end gap-4">
               <Button
                 type="button"
-                variant={`${order && !isEditing ? "default" : "destructive"}`}
-                onClick={isEditing ? () => setOpenAlertDialog(true) : onClose}
+                variant={canDelete || !order ? "destructive" : "default"}
+                onClick={canDelete ? () => setOpenAlertDialog(true) : onClose}
               >
-                {isEditing ? "Excluir" : "Fechar"}
+                {canDelete ? "Excluir" : "Fechar"}
               </Button>
               {(!order || isEditing) && (
                 <Button type="submit" disabled={loading}>

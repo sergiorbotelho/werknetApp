@@ -28,3 +28,10 @@ export interface IOrderService {
     uf: string;
   };
 }
+
+export const serviceTypeLabels: Record<string, string> = {
+  GARANTIA: "Garantia",
+  FORADEGARANTIA: "Fora de garantia",
+  ORCAMENTO: "Orçamento",
+  CONTRATO: "Contrato",
+};

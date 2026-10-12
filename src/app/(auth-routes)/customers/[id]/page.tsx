@@ -2,12 +2,14 @@
 import { CardServiceOrder } from "@/app/components/serviceOrder/serviceorder-card";
 import { OrderPdfModal } from "@/app/components/serviceOrder/order-pdf-modal";
 import { ServiceOrderModal } from "@/app/components/serviceOrder/serviceorder-modal";
+import { SearchInput } from "@/app/components/search-input";
 import { Card } from "@/app/components/ui/card";
-import { Input } from "@/app/components/ui/input";
+import { formatPhone } from "@/helpers/format";
+import { initials } from "@/helpers/initials";
 import { api } from "@/services/api/api";
 import { Customer } from "@/types/customer";
 import { IOrderService } from "@/types/order";
-import { ArrowLeft, Mail, MapPin, Phone, Search } from "lucide-react";
+import { ArrowLeft, Mail, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -102,7 +104,7 @@ export default function PageCustomer() {
       <Card className="p-6 md:p-8 bg-hero text-primary-foreground shadow-glow">
         <div className="flex items-start gap-4">
           <div className="h-16 w-16 rounded-2xl bg-white/20 flex items-center justify-center text-2xl font-bold">
-            {customer?.nome.charAt(0).toUpperCase()}
+            {customer ? initials(customer.nome) : ""}
           </div>
           <div className="flex-1">
             <h1 className="text-3xl font-bold">{customer?.nome}</h1>
@@ -110,7 +112,7 @@ export default function PageCustomer() {
               {customer?.telefone && (
                 <span className="flex gap-1.5">
                   <Phone className="h-4 w-4" />
-                  {customer?.telefone}
+                  {formatPhone(customer?.telefone)}
                 </span>
               )}
 
@@ -131,17 +133,11 @@ export default function PageCustomer() {
           </div>
         </div>
       </Card>
-      <Card className="p-4 bg-card-gradient">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por número, cliente, equipamento, defeito…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="pl-10 h-12"
-          />
-        </div>
-      </Card>
+      <SearchInput
+        value={q}
+        onChange={setQ}
+        placeholder="Buscar por número, equipamento ou defeito"
+      />
       <div>
         <h2 className="text-xl font-semibold mb-4">
           Ordens de Serviço ({serviceOrders?.length ?? 0})

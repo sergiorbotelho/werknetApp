@@ -2,12 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { Input } from "@/app/components/ui/input";
 import { api } from "@/services/api/api";
-import { Search } from "lucide-react";
 import { IOrderService } from "../../../types/order";
 import { Header } from "../header";
-import { Card } from "../ui/card";
+import { SearchInput } from "../search-input";
 import { OrderPdfModal } from "./order-pdf-modal";
 import { CardServiceOrder } from "./serviceorder-card";
 import { ServiceOrderModal } from "./serviceorder-modal";
@@ -73,25 +71,27 @@ export default function ServiceOrders() {
   };
 
   return (
-    <div className="w-full px-4 py-4 sm:px-6 md:px-8 lg:px-10 space-y-4 md:space-y-8 max-w-7xl mx-auto mt-4 md:mt-0">
+    <div className="mx-auto mt-4 w-full max-w-7xl space-y-6 px-4 py-4 sm:px-6 md:mt-0 md:px-8 lg:px-10 lg:py-8">
       <Header
-        title="Ordem de serviço"
-        description="Acompanhe e gerencie todos os seus atendimentos"
-        titleButton="Nova Ordem de serviço"
+        title="Ordens de serviço"
+        description={
+          serviceOrders === null
+            ? "Carregando atendimentos…"
+            : `${serviceOrders.length} ${
+                serviceOrders.length === 1
+                  ? "ordem de serviço"
+                  : "ordens de serviço"
+              }`
+        }
+        titleButton="Nova ordem de serviço"
         setIsModalOpen={setIsModalOpen}
       />
 
-      <Card className="p-4 bg-card-gradient">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por número, cliente, equipamento, defeito…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="pl-10 h-12"
-          />
-        </div>
-      </Card>
+      <SearchInput
+        value={q}
+        onChange={setQ}
+        placeholder="Buscar por número, cliente, equipamento ou defeito"
+      />
 
       <CardServiceOrder
         loading={loading}

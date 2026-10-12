@@ -1,10 +1,8 @@
 "use client";
 import { Customer } from "@/types/customer";
-import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Header } from "../header";
-import { Card } from "../ui/card";
-import { Input } from "../ui/input";
+import { SearchInput } from "../search-input";
 import { CardCustomer } from "./customer-card";
 import { CustomerModal } from "./customer-modal";
 
@@ -28,11 +26,18 @@ export default function Customers({ customers }: CustomersProps) {
 
   const filtered = useMemo(() => {
     if (!q.trim()) return customers;
-    const t = q.toLowerCase();
+    const t = q.trim().toLowerCase();
+    // Telefone e documento são gravados só com dígitos: compara sem a máscara
+    const digits = t.replace(/\D/g, "");
     return customers?.filter(
       (c) =>
         c.nome.toLowerCase().includes(t) ||
-        c.id?.toString().toLowerCase().includes(t),
+        c.email?.toLowerCase().includes(t) ||
+        c.id?.toString().includes(t) ||
+        (digits.length >= 3 &&
+          [c.telefone, c.cpf, c.cnpj].some((value) =>
+            value?.replace(/\D/g, "").includes(digits),
+          )),
     );
   }, [q, customers]);
 
@@ -43,25 +48,20 @@ export default function Customers({ customers }: CustomersProps) {
   };
 
   return (
-    <div className="w-full px-4 py-4 sm:px-6 md:px-8 lg:px-10 space-y-4 md:space-y-8 max-w-7xl mx-auto mt-4 md:mt-0">
+    <div className="mx-auto mt-4 w-full max-w-7xl space-y-6 px-4 py-4 sm:px-6 md:mt-0 md:px-8 lg:px-10 lg:py-8">
       <Header
         title="Clientes"
-        description="Cadastre e acompanhe seus clientes."
-        titleButton="Novo Cliente"
+        description={`${customers.length} ${
+          customers.length === 1 ? "cliente" : "clientes"
+        }`}
+        titleButton="Novo cliente"
         setIsModalOpen={setIsModalOpen}
       />
-      <Card className="p-4 bg-card-gradient">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-
-          <Input
-            placeholder="Buscar cliente…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="pl-10 h-12 w-full"
-          />
-        </div>
-      </Card>
+      <SearchInput
+        value={q}
+        onChange={setQ}
+        placeholder="Buscar por nome, telefone, e-mail ou CPF/CNPJ"
+      />
       <CardCustomer filtered={filtered} handleEdit={handleEdit} />
       {(isModalOpen || selectedCustomer !== null) && (
         <CustomerModal

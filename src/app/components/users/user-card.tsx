@@ -65,15 +65,17 @@ export function UserCard({
             >
               Editar
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={() => onResetPassword(u)}
-            >
-              <KeyRound className="h-4 w-4 mr-2" />
-              Redefinir senha
-            </Button>
+            {u.id !== currentUserId && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1"
+                onClick={() => onResetPassword(u)}
+              >
+                <KeyRound className="h-4 w-4 mr-2" />
+                Redefinir senha
+              </Button>
+            )}
           </div>
         </Card>
       ))}

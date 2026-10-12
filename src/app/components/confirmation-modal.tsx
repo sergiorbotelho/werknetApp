@@ -43,7 +43,7 @@ export function ConfirmationDialog({
           >
             Não
           </AlertDialogCancel>
-          <AlertDialogAction onClick={handleExcluir}>
+          <AlertDialogAction onClick={handleExcluir} disabled={loading}>
             {loading ? loadingText : "Sim"}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -3,7 +3,7 @@
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { Label } from "@/app/components/ui/label";
-import { initials } from "@/helpers/initials";
+import { UserAvatar } from "@/app/components/user-avatar";
 import { api } from "@/services/api/api";
 import { roleLabels, UserRole } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +28,7 @@ interface ProfileProps {
     name: string;
     email: string;
     role: UserRole;
+    avatarUpdatedAt: string | null;
   };
 }
 
@@ -36,6 +37,7 @@ export function Profile({ me }: ProfileProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [displayName, setDisplayName] = useState(me.name);
+  const [avatarUpdatedAt, setAvatarUpdatedAt] = useState(me.avatarUpdatedAt);
   const {
     register,
     handleSubmit,
@@ -71,11 +73,15 @@ export function Profile({ me }: ProfileProps) {
       <div className="h-32 bg-hero sm:h-44" aria-hidden />
 
       <div className="mx-auto w-full max-w-5xl px-4 sm:px-8">
-        {/* Identidade: as iniciais sobrepõem a borda da capa */}
+        {/* Identidade: o avatar sobrepõe a borda da capa */}
         <header className="-mt-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:gap-6">
-          <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-accent text-3xl font-black tracking-tight text-accent-foreground shadow-glow ring-[6px] ring-background sm:h-32 sm:w-32 sm:text-4xl">
-            {initials(displayName)}
-          </div>
+          <UserAvatar
+            id={me.id}
+            name={displayName}
+            avatarUpdatedAt={avatarUpdatedAt}
+            className="h-24 w-24 text-3xl font-black tracking-tight shadow-glow ring-[6px] ring-background sm:h-32 sm:w-32 sm:text-4xl"
+            fallbackClassName="bg-accent text-accent-foreground"
+          />
           <div className="min-w-0 space-y-2 sm:pb-2">
             <h1 className="break-words text-2xl font-bold leading-tight tracking-tight text-foreground sm:text-4xl">
               {displayName}

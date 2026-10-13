@@ -7,6 +7,7 @@ export interface User {
   role: UserRole;
   active: boolean;
   mustChangePassword: boolean;
+  avatarUpdatedAt: string | null;
   created_at: string;
 }
 

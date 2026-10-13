@@ -1,5 +1,5 @@
 import { Button } from "@/app/components/ui/button";
-import { initials } from "@/helpers/initials";
+import { UserAvatar } from "@/app/components/user-avatar";
 import { cn } from "@/lib/utils";
 import { roleLabels, User } from "@/types/user";
 import { KeyRound, Pencil, SearchX } from "lucide-react";
@@ -20,23 +20,31 @@ const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "America/Recife",
 });
 
-// A cor das iniciais indica o perfil; inativo fica neutro
-function UserAvatar({ user, size = "md" }: { user: User; size?: "md" | "lg" }) {
+// Sem foto, a cor das iniciais indica o perfil; inativo fica neutro
+function UserListAvatar({
+  user,
+  size = "md",
+}: {
+  user: User;
+  size?: "md" | "lg";
+}) {
   return (
-    <div
-      aria-hidden
+    <UserAvatar
+      id={user.id}
+      name={user.name}
+      avatarUpdatedAt={user.avatarUpdatedAt}
       className={cn(
-        "flex shrink-0 items-center justify-center rounded-full font-bold tracking-tight",
+        "font-bold tracking-tight",
         size === "lg" ? "h-12 w-12 text-base" : "h-10 w-10 text-sm",
+      )}
+      fallbackClassName={
         !user.active
           ? "bg-muted text-muted-foreground"
           : user.role === "ADMIN"
             ? "bg-primary text-primary-foreground"
-            : "bg-accent text-accent-foreground",
-      )}
-    >
-      {initials(user.name)}
-    </div>
+            : "bg-accent text-accent-foreground"
+      }
+    />
   );
 }
 
@@ -157,7 +165,7 @@ export function UserList({
                         !user.active && "opacity-60",
                       )}
                     >
-                      <UserAvatar user={user} />
+                      <UserListAvatar user={user} />
                       <NameAndEmail user={user} isSelf={isSelf} />
                     </div>
                   </td>
@@ -219,7 +227,7 @@ export function UserList({
                   !user.active && "opacity-60",
                 )}
               >
-                <UserAvatar user={user} size="lg" />
+                <UserListAvatar user={user} size="lg" />
                 <NameAndEmail user={user} isSelf={isSelf} />
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">

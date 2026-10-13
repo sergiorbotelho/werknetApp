@@ -33,6 +33,7 @@ function UserListAvatar({
       id={user.id}
       name={user.name}
       avatarUpdatedAt={user.avatarUpdatedAt}
+      alt=""
       className={cn(
         "font-bold tracking-tight",
         size === "lg" ? "h-12 w-12 text-base" : "h-10 w-10 text-sm",

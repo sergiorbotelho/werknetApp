@@ -9,6 +9,8 @@ interface UserAvatarProps {
   id: string;
   name: string;
   avatarUpdatedAt: string | null;
+  // "" quando o nome já aparece ao lado (o leitor de tela não repete)
+  alt?: string;
   // Tamanho, anel, sombra e tipografia das iniciais
   className?: string;
   // Fundo e cor do texto das iniciais (só sem foto)
@@ -22,6 +24,7 @@ export function UserAvatar({
   id,
   name,
   avatarUpdatedAt,
+  alt,
   className,
   fallbackClassName,
 }: UserAvatarProps) {
@@ -47,7 +50,7 @@ export function UserAvatar({
           unoptimized
           fill
           src={`/api/avatar/${id}?v=${encodeURIComponent(avatarUpdatedAt)}`}
-          alt={`Foto de ${name}`}
+          alt={alt ?? `Foto de ${name}`}
           sizes="128px"
           className="object-cover"
           onError={() => setFailed(true)}

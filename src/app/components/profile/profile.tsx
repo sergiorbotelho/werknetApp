@@ -99,6 +99,11 @@ export function Profile({ me }: ProfileProps) {
     setCropSrc(null);
   };
 
+  const handlePhotoError = () => {
+    closeCrop();
+    toast.error("Não foi possível abrir a imagem. Escolha outro arquivo.");
+  };
+
   const handleSavePhoto = async (area: Area) => {
     if (!cropSrc) return;
     setSavingPhoto(true);
@@ -262,6 +267,7 @@ export function Profile({ me }: ProfileProps) {
         saving={savingPhoto}
         onCancel={closeCrop}
         onSave={handleSavePhoto}
+        onImageError={handlePhotoError}
       />
       <ConfirmationDialog
         title="Remover foto de perfil?"

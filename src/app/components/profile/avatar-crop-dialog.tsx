@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/app/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Cropper, { type Area } from "react-easy-crop";
 
 interface AvatarCropDialogProps {
@@ -18,6 +18,8 @@ interface AvatarCropDialogProps {
   saving: boolean;
   onCancel: () => void;
   onSave: (area: Area) => void;
+  // Arquivo que o navegador não consegue abrir (corrompido, formato trocado)
+  onImageError: () => void;
 }
 
 // O pai monta com key={imageSrc}: cada arquivo começa sem zoom e centralizado
@@ -26,10 +28,21 @@ export function AvatarCropDialog({
   saving,
   onCancel,
   onSave,
+  onImageError,
 }: AvatarCropDialogProps) {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [area, setArea] = useState<Area | null>(null);
+  // O Cropper mede o contêiner ao montar. Durante a animação de abertura o
+  // modal está em scale(0.95), e a medida sairia 5% menor que o círculo real.
+  const [ready, setReady] = useState(false);
+
+  // Garantia caso o animationend não dispare
+  useEffect(() => {
+    if (!imageSrc) return;
+    const timer = setTimeout(() => setReady(true), 300);
+    return () => clearTimeout(timer);
+  }, [imageSrc]);
 
   return (
     <Dialog
@@ -38,7 +51,10 @@ export function AvatarCropDialog({
         if (!open && !saving) onCancel();
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent
+        className="sm:max-w-md"
+        onAnimationEnd={() => setReady(true)}
+      >
         <DialogHeader>
           <DialogTitle>Ajustar foto</DialogTitle>
           <DialogDescription>
@@ -47,7 +63,7 @@ export function AvatarCropDialog({
         </DialogHeader>
 
         <div className="relative h-72 w-full overflow-hidden rounded-lg bg-muted">
-          {imageSrc && (
+          {imageSrc && ready && (
             <Cropper
               image={imageSrc}
               crop={crop}
@@ -58,6 +74,7 @@ export function AvatarCropDialog({
               onCropChange={setCrop}
               onZoomChange={setZoom}
               onCropComplete={(_, pixels) => setArea(pixels)}
+              mediaProps={{ onError: onImageError }}
             />
           )}
         </div>

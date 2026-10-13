@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Werk OS App: a Next.js 14 (App Router) frontend for managing customers (`clientes`) and service orders (`ordens de serviço`, "OS"). UI text, domain field names (`nome`, `telefone`, `defeito`, `valServico`…) and code comments are in Brazilian Portuguese. Keep new UI strings in pt-BR. This repo is frontend only. All data comes from an external REST API whose base URL is `NEXT_PUBLIC_API`.
+Werk OS App: a Next.js 14 (App Router) frontend for managing customers (`clientes`) and service orders (`ordens de serviço`, "OS"). UI text, domain field names (`nome`, `telefone`, `defeito`, `valServico`…) and code comments are in Brazilian Portuguese. Keep new UI strings in pt-BR. All data comes from an external REST API whose base URL is `NEXT_PUBLIC_API`. The only route handlers in this repo are next-auth's and the profile photo proxy `/api/avatar/[id]`.
 
 ## Commands
 
@@ -42,9 +42,15 @@ Required env vars (see `.env.example`): `NEXTAUTH_URL`, `NEXTAUTH_SECRET`, `NEXT
 - `/customers` is a server component. It fetches with `getServerApi()` and passes the data to client components. After a mutation, the client modals call `router.refresh()` to re-fetch.
 - `/` (the service orders list, route group `(serviceorder)`) and `/customers/[id]` are client-side. They fetch in `useEffect` with `api`, keep the results in local state, and pass a `loadOrders` callback into the modal so it can reload after a mutation.
 
-**Backend endpoints in use:** `/session`, `/me` (GET, PUT), `/me/password`, `/users` (list, create), `/users/:id`, `/users/:id/reset-password`, `/customers` (list, `data.customers`), `/customer` and `/customer/:id` (CRUD), `/os` (list, `data.os`), `/os/:id`, `/os/:id/pdf`, `/os/client/:customerId`.
+**Backend endpoints in use:** `/session`, `/me` (GET, PUT), `/me/password`, `/me/avatar` (PUT raw JPEG, DELETE), `/users/:id/avatar` (only through the proxy), `/users` (list, create), `/users/:id`, `/users/:id/reset-password`, `/customers` (list, `data.customers`), `/customer` and `/customer/:id` (CRUD), `/os` (list, `data.os`), `/os/:id`, `/os/:id/pdf`, `/os/client/:customerId`.
 
 **Feature components** live under `src/app/components/{customers,serviceOrder,users,profile}/`. Each feature has a list container, a card, a skeleton, and a create/edit modal. The modals use react-hook-form with zod schemas. Feedback is shown with `react-toastify`. Shared pieces are `header.tsx` (page title plus a "new" button) and `confirmation-modal.tsx` (the delete confirmation).
+
+**Profile photo:**
+- `src/app/components/user-avatar.tsx` (`UserAvatar`) shows the user's photo, or the initials when `avatarUpdatedAt` is null or the image fails to load. It is used in `/perfil` and in the user list (with `alt=""`, because the name is next to it).
+- The image `src` is `/api/avatar/<id>?v=<avatarUpdatedAt>`. The route handler `src/app/api/avatar/[id]/route.ts` validates the UUID, reads the token with `getServerSession` and proxies `GET /users/:id/avatar`, because an `<img>` cannot send the `Authorization` header. It answers with `Cache-Control: private, max-age=31536000, immutable` (a new photo means a new `?v=`) and `X-Content-Type-Options: nosniff`.
+- `next/image` must keep `unoptimized` there. Without it, the request goes through `/_next/image`, which fetches from the server without the user's cookie (401) and caches by URL.
+- In `/perfil`, the camera button opens a file input (JPEG/PNG/WebP up to 10 MB). `profile/avatar-crop-dialog.tsx` crops with `react-easy-crop` and `src/helpers/cropImage.ts` draws a 512×512 JPEG (white background for transparent PNGs) that is sent to `PUT /me/avatar`. The `Cropper` mounts only after the dialog's zoom-in animation ends, because it measures its container with `getBoundingClientRect` and would get a 5% smaller crop area mid-animation.
 
 **Modal convention:** each modal renders with `open={true}`. The parent mounts it conditionally (`isModalOpen || selected !== null`) and passes `isEditing` plus the selected entity. One modal handles create, edit, and delete.
 

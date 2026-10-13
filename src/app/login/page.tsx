@@ -14,6 +14,7 @@ import Image from "next/image";
 import { z } from "zod";
 import logo from "../../../public/logo.jpeg";
 
+import { PasswordInput } from "@/app/components/password-input";
 import { Input } from "@/app/components/ui/input";
 import { markTabSession } from "@/lib/tab-session";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -127,9 +128,9 @@ export default function Login() {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input
+                        <PasswordInput
                           placeholder="Digite seu password"
-                          type="password"
+                          autoComplete="current-password"
                           {...register("password")}
                           {...field}
                         />

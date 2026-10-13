@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { IOrderService, serviceTypeLabels } from "@/types/order";
 import { FileText, Pencil, Wrench } from "lucide-react";
 import { Button } from "../ui/button";
-import { CardSkeleton } from "./serviceorder-skeleton";
+import { ServiceOrderListSkeleton } from "./serviceorder-skeleton";
 
 interface CardServiceOrderProps {
   loading: boolean;
@@ -38,25 +38,6 @@ function ServiceTypeTag({ type }: { type: string }) {
   );
 }
 
-function TableSkeleton() {
-  return (
-    <div className="hidden overflow-hidden rounded-xl border border-border bg-card lg:block">
-      <div className="h-11 border-b border-border bg-secondary" />
-      {Array.from({ length: 6 }).map((_, idx) => (
-        <div
-          key={idx}
-          className="flex items-center gap-6 border-b border-border px-5 py-5 last:border-b-0"
-        >
-          <div className="h-4 w-12 animate-pulse rounded bg-muted" />
-          <div className="h-4 flex-1 animate-pulse rounded bg-muted" />
-          <div className="h-4 flex-1 animate-pulse rounded bg-muted" />
-          <div className="h-4 w-24 animate-pulse rounded bg-muted" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export const CardServiceOrder = ({
   loading,
   filtered,
@@ -64,16 +45,7 @@ export const CardServiceOrder = ({
   handleViewPdf,
 }: CardServiceOrderProps) => {
   if (loading) {
-    return (
-      <>
-        <TableSkeleton />
-        <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-1 lg:hidden">
-          {Array.from({ length: 4 }).map((_, idx) => (
-            <CardSkeleton key={idx} />
-          ))}
-        </div>
-      </>
-    );
+    return <ServiceOrderListSkeleton />;
   }
 
   if (!filtered || filtered.length === 0) {

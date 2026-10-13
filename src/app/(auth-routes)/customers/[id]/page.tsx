@@ -4,6 +4,7 @@ import { OrderPdfModal } from "@/app/components/serviceOrder/order-pdf-modal";
 import { ServiceOrderModal } from "@/app/components/serviceOrder/serviceorder-modal";
 import { SearchInput } from "@/app/components/search-input";
 import { Card } from "@/app/components/ui/card";
+import { Skeleton } from "@/app/components/ui/skeleton";
 import { formatPhone } from "@/helpers/format";
 import { initials } from "@/helpers/initials";
 import { api } from "@/services/api/api";
@@ -20,7 +21,9 @@ export default function PageCustomer() {
     null,
   );
   const [customer, setCustomer] = useState<Customer | null>(null);
-  const [loading, setLoading] = useState(false);
+  // Começam carregando: sem isso, o 1º render mostra a lista vazia
+  const [loading, setLoading] = useState(true);
+  const [customerLoading, setCustomerLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [q, setQ] = useState("");
@@ -44,7 +47,8 @@ export default function PageCustomer() {
         toast.error(
           error.response?.data?.message ?? "Erro ao carregar o cliente.",
         );
-      });
+      })
+      .finally(() => setCustomerLoading(false));
   };
 
   const loadOrderByCustomer = async () => {
@@ -106,31 +110,46 @@ export default function PageCustomer() {
           <div className="h-16 w-16 rounded-2xl bg-white/20 flex items-center justify-center text-2xl font-bold">
             {customer ? initials(customer.nome) : ""}
           </div>
-          <div className="flex-1">
-            <h1 className="text-3xl font-bold">{customer?.nome}</h1>
-            <div className="flex flex-wrap gap-4 mt-3 text-sm opacity-90">
-              {customer?.telefone && (
-                <span className="flex gap-1.5">
-                  <Phone className="h-4 w-4" />
-                  {formatPhone(customer?.telefone)}
-                </span>
-              )}
-
-              {customer?.email && (
-                <span className="flex items-center gap-1.5">
-                  <Mail className="h-4 w-4" />
-                  {customer?.email}
-                </span>
-              )}
-
-              {customer?.endereco && (
-                <span className="flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4" />
-                  {customer?.endereco}
-                </span>
-              )}
+          {customerLoading ? (
+            <div
+              className="min-w-0 flex-1 space-y-3"
+              role="status"
+              aria-label="Carregando cliente"
+            >
+              <Skeleton className="h-9 w-full max-w-[14rem] bg-white/20" />
+              <div className="flex flex-wrap gap-4">
+                <Skeleton className="h-5 w-32 bg-white/20" />
+                <Skeleton className="h-5 w-44 bg-white/20" />
+                <Skeleton className="h-5 w-40 bg-white/20" />
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold">{customer?.nome}</h1>
+              <div className="flex flex-wrap gap-4 mt-3 text-sm opacity-90">
+                {customer?.telefone && (
+                  <span className="flex gap-1.5">
+                    <Phone className="h-4 w-4" />
+                    {formatPhone(customer?.telefone)}
+                  </span>
+                )}
+
+                {customer?.email && (
+                  <span className="flex items-center gap-1.5">
+                    <Mail className="h-4 w-4" />
+                    {customer?.email}
+                  </span>
+                )}
+
+                {customer?.endereco && (
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4" />
+                    {customer?.endereco}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </Card>
       <SearchInput
@@ -140,7 +159,7 @@ export default function PageCustomer() {
       />
       <div>
         <h2 className="text-xl font-semibold mb-4">
-          Ordens de Serviço ({serviceOrders?.length ?? 0})
+          Ordens de Serviço{serviceOrders ? ` (${serviceOrders.length})` : ""}
         </h2>
         <div className="space-y-3">
           <CardServiceOrder

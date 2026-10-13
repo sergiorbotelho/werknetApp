@@ -15,7 +15,8 @@ export default function ServiceOrders() {
     null,
   );
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [loading, setLoading] = useState(false);
+  // Começa carregando: sem isso, o 1º render mostra "nenhuma OS encontrada"
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [q, setQ] = useState("");

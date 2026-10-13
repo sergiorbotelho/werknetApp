@@ -46,3 +46,17 @@ export function formatDocument(cpf?: string, cnpj?: string) {
   }
   return "";
 }
+
+const dateTimeFormatter = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  timeZone: "America/Recife",
+});
+
+// "13/10/2026 14:30"
+export function formatDateTime(value: string | Date) {
+  return dateTimeFormatter.format(new Date(value)).replace(",", "");
+}

@@ -4,6 +4,7 @@ import { Button } from "@/app/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   CircleUser,
+  DatabaseBackup,
   ShieldCheck,
   LayoutDashboard,
   LogOut,
@@ -22,7 +23,10 @@ const nav = [
   { to: "/customers", label: "Clientes", icon: Users2Icon },
 ];
 const profileNav = { to: "/perfil", label: "Meu perfil", icon: CircleUser };
-const adminNav = [{ to: "/usuarios", label: "Usuários", icon: ShieldCheck }];
+const adminNav = [
+  { to: "/usuarios", label: "Usuários", icon: ShieldCheck },
+  { to: "/backup", label: "Backup", icon: DatabaseBackup },
+];
 export function SidebarNav({ className, ...props }: SidebarNavProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const path = usePathname();

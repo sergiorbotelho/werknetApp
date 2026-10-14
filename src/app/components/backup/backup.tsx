@@ -12,13 +12,14 @@ import {
 import { apiErrorMessage } from "@/helpers/apiErrorMessage";
 import { downloadBackup } from "@/helpers/downloadBackup";
 import { formatDateTime } from "@/helpers/format";
-import { BACKUP_WARNING_BYTES } from "@/helpers/readBackup";
+import { BACKUP_WARNING_BYTES, readBackup } from "@/helpers/readBackup";
 import { cn } from "@/lib/utils";
-import { BackupLogEntry, BackupStatus } from "@/types/backup";
-import { DatabaseBackup, TriangleAlert } from "lucide-react";
+import { BackupLogEntry, BackupPreview, BackupStatus } from "@/types/backup";
+import { DatabaseBackup, TriangleAlert, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { RestoreBackupDialog } from "./restore-backup-dialog";
 
 const STALE_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -42,8 +43,26 @@ interface BackupProps {
 export default function Backup({ status }: BackupProps) {
   const router = useRouter();
   const [generating, setGenerating] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [restore, setRestore] = useState<{
+    file: File;
+    preview: BackupPreview;
+  } | null>(null);
 
-  const { lastBackup } = status;
+  const handleFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    // Zera o input: escolher o mesmo arquivo de novo precisa disparar o onChange
+    event.target.value = "";
+    if (!file) return;
+
+    try {
+      setRestore({ file, preview: await readBackup(file) });
+    } catch (error) {
+      toast.error((error as Error).message);
+    }
+  };
+
+  const { lastBackup, lastRestore } = status;
   const stale =
     !lastBackup ||
     Date.now() - new Date(lastBackup.created_at).getTime() >
@@ -118,7 +137,49 @@ export default function Backup({ status }: BackupProps) {
             </Button>
           </CardFooter>
         </Card>
+
+        <Card className="flex flex-col">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Upload className="h-5 w-5" />
+              Restaurar
+            </CardTitle>
+            <CardDescription>
+              Substitui todos os dados atuais pelos do arquivo.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 text-sm">
+            <p className="text-muted-foreground">
+              Última restauração:{" "}
+              {lastRestore ? describeLog(lastRestore) : "nunca"}
+            </p>
+          </CardContent>
+          <CardFooter>
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".gz,application/gzip"
+              hidden
+              onChange={handleFile}
+            />
+            <Button
+              variant="outline"
+              className="h-11 w-full sm:w-auto"
+              onClick={() => inputRef.current?.click()}
+            >
+              Escolher arquivo
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
+
+      {restore && (
+        <RestoreBackupDialog
+          file={restore.file}
+          preview={restore.preview}
+          onClose={() => setRestore(null)}
+        />
+      )}
     </div>
   );
 }

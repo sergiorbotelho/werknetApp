@@ -1,4 +1,3 @@
-import { ThemeProvider } from "@/providers/theme-provider";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import { AppToaster } from "./components/app-toaster";
@@ -27,15 +26,8 @@ export default async function RootLayout({
       <body className={roboto.className}>
         <NextAuthSessionProvider>
           <AuthProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-              <AppToaster />
-            </ThemeProvider>
+            {children}
+            <AppToaster />
           </AuthProvider>
         </NextAuthSessionProvider>
       </body>

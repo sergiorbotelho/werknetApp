@@ -24,8 +24,24 @@ import { RestoreBackupDialog } from "./restore-backup-dialog";
 const STALE_DAYS = 7;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+const recifeDayFormatter = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: "America/Recife",
+});
+
+// Meia-noite UTC do dia do calendário em Recife, para comparar só a data
+function recifeDay(value: string | number) {
+  const parts = recifeDayFormatter.formatToParts(new Date(value));
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((item) => item.type === type)?.value);
+  return Date.UTC(part("year"), part("month") - 1, part("day"));
+}
+
+// Dias de calendário em Recife, não intervalos de 24 h: 22:07 de ontem é "ontem"
 function daysAgo(value: string) {
-  const days = Math.floor((Date.now() - new Date(value).getTime()) / DAY_MS);
+  const days = Math.round((recifeDay(Date.now()) - recifeDay(value)) / DAY_MS);
   if (days <= 0) return "hoje";
   if (days === 1) return "ontem";
   return `há ${days} dias`;

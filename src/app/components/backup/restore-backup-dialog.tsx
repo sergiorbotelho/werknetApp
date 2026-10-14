@@ -17,6 +17,7 @@ import { downloadBackup } from "@/helpers/downloadBackup";
 import { formatDateTime } from "@/helpers/format";
 import { api } from "@/services/api/api";
 import { BackupCounts, BackupPreview } from "@/types/backup";
+import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "react-toastify";
@@ -51,6 +52,7 @@ export function RestoreBackupDialog({
 }: RestoreBackupDialogProps) {
   const [confirmation, setConfirmation] = useState("");
   const [step, setStep] = useState<Step>("idle");
+  const router = useRouter();
   const busy = step !== "idle";
 
   const handleRestore = async () => {
@@ -76,6 +78,8 @@ export function RestoreBackupDialog({
       setTimeout(() => signOut({ callbackUrl: "/login" }), 1500);
     } catch (error) {
       toast.error(await apiErrorMessage(error, "Erro ao restaurar o backup."));
+      // O backup automático já gravou um log: atualiza o card "Último backup"
+      router.refresh();
       setStep("idle");
     }
   };

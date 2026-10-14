@@ -34,6 +34,13 @@ export async function readBackup(file: File): Promise<BackupPreview> {
     throw new Error(INVALID_FILE);
   }
 
+  if (
+    typeof content.createdBy !== "string" ||
+    isNaN(new Date(content.createdAt).getTime())
+  ) {
+    throw new Error(INVALID_FILE);
+  }
+
   return {
     createdAt: content.createdAt,
     createdBy: content.createdBy,

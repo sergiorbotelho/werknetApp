@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 import {
   CircleUser,
   DatabaseBackup,
-  ShieldCheck,
   LayoutDashboard,
   LogOut,
   Menu,
+  ShieldCheck,
   Users2Icon,
   X,
 } from "lucide-react";
@@ -81,7 +81,7 @@ export function SidebarNav({ className, ...props }: SidebarNavProps) {
         <div className="p-4 border-t border-primary-foreground/10">
           <Button
             variant="ghost"
-            className="w-full justify-start text-black hover:bg-gray-300 "
+            className="w-full justify-start text-black hover:bg-red-500 hover:text-white "
             onClick={() => signOut()}
           >
             <LogOut className="h-4 w-4 mr-2" />

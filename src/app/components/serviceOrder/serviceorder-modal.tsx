@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { z } from "zod";
 import { ConfirmationDialog } from "../confirmation-modal";
 import {

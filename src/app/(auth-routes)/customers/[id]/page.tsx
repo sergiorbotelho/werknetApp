@@ -14,7 +14,7 @@ import { ArrowLeft, Mail, MapPin, Phone } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 
 export default function PageCustomer() {
   const [serviceOrders, setServiceOrders] = useState<IOrderService[] | null>(

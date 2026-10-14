@@ -15,7 +15,7 @@ import { useRouter } from "next/navigation";
 import { ChangeEvent, useRef, useState } from "react";
 import type { Area } from "react-easy-crop";
 import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { z } from "zod";
 import { AvatarCropDialog } from "./avatar-crop-dialog";
 import { ChangePasswordForm } from "./change-password-form";

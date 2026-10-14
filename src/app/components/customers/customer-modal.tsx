@@ -18,7 +18,7 @@ import { useSession } from "next-auth/react";
 import { ReactNode, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import InputMask from "react-input-mask";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { z } from "zod";
 import { ConfirmationDialog } from "../confirmation-modal";
 

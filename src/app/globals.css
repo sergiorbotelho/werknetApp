@@ -178,3 +178,120 @@
     --sidebar-ring: oklch(0.551 0.027 264.364);
   }
 }
+
+/* Toasts (react-toastify, montado em components/app-toaster.tsx): borda e
+   fundo na cor do tipo, ícone em círculo cheio, título + mensagem. Fica fora
+   dos @layer para vencer o CSS da biblioteca. */
+:root {
+  --toastify-toast-width: 480px;
+  --toastify-font-family: inherit;
+}
+
+.Toastify__toast.werk-toast {
+  --toast-accent: #3b82f6;
+  align-items: center;
+  min-height: 0;
+  margin-bottom: 0.75rem;
+  padding: 0.875rem 0.75rem 0.875rem 1rem;
+  border: 1.5px solid var(--toast-accent);
+  border-radius: 0.75rem;
+  background: color-mix(in oklab, var(--toast-accent) 9%, var(--card));
+  color: var(--foreground);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.06);
+  font-family: inherit;
+}
+
+.Toastify__toast.werk-toast.Toastify__toast--success {
+  --toast-accent: #4ade80;
+}
+.Toastify__toast.werk-toast.Toastify__toast--warning {
+  --toast-accent: #facc15;
+}
+.Toastify__toast.werk-toast.Toastify__toast--error {
+  --toast-accent: #ef4444;
+}
+
+/* Barra de progresso na cor do tipo, sobre um trilho claro da mesma cor. */
+.werk-toast .Toastify__progress-bar--wrp {
+  height: 4px;
+}
+
+.werk-toast .Toastify__progress-bar,
+.werk-toast .Toastify__progress-bar--bg {
+  background: var(--toast-accent);
+}
+
+.werk-toast .Toastify__toast-body {
+  margin: 0;
+  padding: 0;
+  gap: 0.875rem;
+}
+
+.werk-toast .Toastify__toast-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-inline-end: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--toast-accent);
+  color: #fff;
+}
+
+.werk-toast-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--foreground);
+}
+
+.werk-toast-message {
+  margin-top: 0.125rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
+.werk-toast-message a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.werk-toast-close {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin-inline-start: 0.5rem;
+  border-radius: 0.5rem;
+  color: var(--muted-foreground);
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+}
+
+.werk-toast-close:hover {
+  background: var(--card);
+  color: var(--foreground);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.08);
+}
+
+.werk-toast-close:focus-visible {
+  outline: 2px solid var(--toast-accent);
+  outline-offset: 1px;
+}
+
+/* No celular a biblioteca cola o toast nas bordas e tira o arredondamento. */
+@media only screen and (max-width: 480px) {
+  .Toastify__toast-container {
+    padding: 0.75rem 1rem 0;
+  }
+
+  .Toastify__toast.werk-toast {
+    margin-bottom: 0.5rem;
+    border-radius: 0.75rem;
+  }
+}

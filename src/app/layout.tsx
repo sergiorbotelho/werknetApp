@@ -1,7 +1,7 @@
 import { ThemeProvider } from "@/providers/theme-provider";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import { ToastContainer } from "react-toastify";
+import { AppToaster } from "./components/app-toaster";
 
 import NextAuthSessionProvider from "@/providers/sessionProvider";
 import "react-toastify/dist/ReactToastify.css";
@@ -34,7 +34,7 @@ export default async function RootLayout({
               disableTransitionOnChange
             >
               {children}
-              <ToastContainer position="top-center" autoClose={2000} />
+              <AppToaster />
             </ThemeProvider>
           </AuthProvider>
         </NextAuthSessionProvider>

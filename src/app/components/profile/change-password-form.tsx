@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, X } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { z } from "zod";
 
 // Mesma regra da API (passwordSchema em apiwerk/src/schemas/user.ts)

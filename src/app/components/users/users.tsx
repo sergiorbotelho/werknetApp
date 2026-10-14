@@ -5,7 +5,7 @@ import { api } from "@/services/api/api";
 import { User } from "@/types/user";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { ConfirmationDialog } from "../confirmation-modal";
 import { Header } from "../header";
 import { SearchInput } from "../search-input";

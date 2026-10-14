@@ -20,7 +20,7 @@ import { BackupCounts, BackupPreview } from "@/types/backup";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 
 const CONFIRMATION_WORD = "RESTAURAR";
 

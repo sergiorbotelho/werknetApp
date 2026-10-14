@@ -10,7 +10,7 @@ import {
   DialogTitle,
 } from "@/app/components/ui/dialog";
 import { Copy } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 
 interface TemporaryPasswordDialogProps {
   name: string;

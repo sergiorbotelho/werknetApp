@@ -11,7 +11,7 @@ import { IOrderService } from "@/types/order";
 import { Download, Printer, Share2, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { PdfStatus } from "./pdf-status";
 
 // pdf.js depende de APIs do navegador; carrega só no cliente e quando o modal abre

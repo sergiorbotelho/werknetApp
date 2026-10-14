@@ -18,7 +18,7 @@ import { BackupLogEntry, BackupPreview, BackupStatus } from "@/types/backup";
 import { DatabaseBackup, TriangleAlert, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ChangeEvent, useRef, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "@/lib/toast";
 import { RestoreBackupDialog } from "./restore-backup-dialog";
 
 const STALE_DAYS = 7;
